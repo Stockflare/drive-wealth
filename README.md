@@ -1,33 +1,33 @@
-# TradeIt
+# DriveWealth
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'trade_it', github: 'stockflare/trade-it', tag: '0.1.0'
+gem 'drive_wealth', github: 'stockflare/drive-wealth', tag: '0.1.0'
 ```
 
 ## Usage
 
-This Gem wraps all interactions with The [TradeIt](https://www.trade.it/documentation) API into a format that is convenient for our own internal APIs.
+This Gem wraps all interactions with The [DriveWealth](http://developer.drivewealth.com/) API into a format that is convenient for our own internal APIs.
 
-Once installed all TradeIt actions are objects within the `TradeIt` module.  Each object is initialized with the parameters required for the TradeIt call and has one `call` method to execute the communications with TradeIt.  All objects return the result of the TradeIt interaction in a `response` attribute that supports `to_h`
+Once installed all DriveWealth actions are objects within the `DriveWealth` module.  Each object is initialized with the parameters required for the DriveWealth call and has one `call` method to execute the communications with DriveWealth.  All objects return the result of the DriveWealth interaction in a `response` attribute that supports `to_h`
 
-It is expected that most Stockflare use cases will only use the `response.payload` as this is a parsed version of the TradeIt response suitable for Stockflare and it is this output that is tested.  For convenience the `response.payload` is delivered as a `Hashie::Mash` to allow for method based access, for instance you can can access the status of the call by using `response.payload.status`.
+It is expected that most Stockflare use cases will only use the `response.payload` as this is a parsed version of the DriveWealth response suitable for Stockflare and it is this output that is tested.  For convenience the `response.payload` is delivered as a `Hashie::Mash` to allow for method based access, for instance you can can access the status of the call by using `response.payload.status`.
 
-Additionally a `response.raw` is provided that contains the raw TradeIt response.  This is provided for development and debug purposes only.  Upstream users should only rely on the `response.payload` and `response.messages`.  This will allow us to deal with minor breaking changes in the TradeIt API (which is currently in QA) without having to make code changes in upstream users.
+Additionally a `response.raw` is provided that contains the raw DriveWealth response.  This is provided for development and debug purposes only.  Upstream users should only rely on the `response.payload` and `response.messages`.  This will allow us to deal with minor breaking changes in the DriveWealth API (which is currently in QA) without having to make code changes in upstream users.
 
-All Error cases are handled by raising a subclass of `TradeIt::Errors::TradeItException`, this object exposes a number of attributes that can you can `to_h` to the consumer.
+All Error cases are handled by raising a subclass of `DriveWealth::Errors::DriveWealthException`, this object exposes a number of attributes that can you can `to_h` to the consumer.
 
 ### Configuration Values
 
 Two attributes need to be set
 
 ```
-TradeIt.configure do |config|
-  config.api_uri = ENV['TRADEIT_BASE_URI']
-  config.api_key = ENV['TRADEIT_API_KEY']
+DriveWealth.configure do |config|
+  config.api_uri = ENV['DriveWealth_BASE_URI']
+  config.api_key = ENV['DriveWealth_API_KEY']
 end
 ```
 
@@ -36,17 +36,7 @@ end
 We current support the following broker symbols
 ```
 {
-  td: 'TD',
-  etrade: 'Etrade',
-  scottrade: 'Scottrade',
-  fidelity: 'Fidelity',
-  schwab: 'Schwab',
-  trade_station: 'TradeStation',
-  robinhood: 'Robinhood',
-  options_house: 'OptionsHouse',
-  ib: 'IB',
-  tradier: 'Tradier',
-  dummy: 'Dummy'
+  drive_wealth: 'DriveWealth'
 }
 ```
 
@@ -82,14 +72,14 @@ We current support the following broker symbols
 
 Note that the test user does not support type `:gtc`
 
-### TradeIt::User::Link
+### DriveWealth::User::Link
 
 Get a Users oAuth token
 
 Example Call:
 
 ```
-TradeIt::User::Link.new(
+DriveWealth::User::Link.new(
   username: username,
   password: password,
   broker: broker
@@ -113,7 +103,7 @@ Successful response:
   messages: ['User succesfully linked'] }
 ```
 
-Link failure will raise a `TradeIt::Errors::LoginException` with the following attributes:
+Link failure will raise a `DriveWealth::Errors::LoginException` with the following attributes:
 
 ```
 { type: :error,
@@ -123,12 +113,12 @@ Link failure will raise a `TradeIt::Errors::LoginException` with the following a
 ```
 
 
-### TradeIt::User::Login
+### DriveWealth::User::Login
 
 example call:
 
 ```
-TradeIt::User::Login.new(
+DriveWealth::User::Login.new(
   user_id: user_id,
   user_token: user_token
 ).call.response
@@ -207,7 +197,7 @@ The `encoded` image is Base64 encoded
   messages: [] }
 ```
 
-Login failure will raise a `TradeIt::Errors::LoginException` with the following attributes:
+Login failure will raise a `DriveWealth::Errors::LoginException` with the following attributes:
 
 ```
 { type: :error,
@@ -216,22 +206,22 @@ Login failure will raise a `TradeIt::Errors::LoginException` with the following 
   messages: ['Check your username and password and try again.'] }
 ```
 
-### TradeIt::User::Verify
+### DriveWealth::User::Verify
 
 Example Call
 
 ```
-TradeIt::User::Verify.new(
-  token: <token from TradeIt::User::Login>,
+DriveWealth::User::Verify.new(
+  token: <token from DriveWealth::User::Login>,
   answer: answer
 ).call.response
 ```
 
-All success responses are identical to `TradeIt::User::Login`
+All success responses are identical to `DriveWealth::User::Login`
 
 If the user provides a bad answer then the response will be a success asking another question.
 
-A failure will raise a `TradeIt::Errors::LoginException` with the similar attributes:
+A failure will raise a `DriveWealth::Errors::LoginException` with the similar attributes:
 ```
 { type: :error,
   code: 500,
@@ -239,15 +229,15 @@ A failure will raise a `TradeIt::Errors::LoginException` with the similar attrib
   messages: ['Your session has expired. Please try again'] }
 ```
 
-### TradeIt::User::Account
+### DriveWealth::User::Account
 
 Get the current financial state of an account
 
 Example Call
 
 ```
-TradeIt::User::Account.new(
-  token: <token from TradeIt::User::Login>,
+DriveWealth::User::Account.new(
+  token: <token from DriveWealth::User::Login>,
   account_number: account_number
 ).call.response
 ```
@@ -282,7 +272,7 @@ Example response
 ```
 
 
-A failure will raise a `TradeIt::Errors::LoginException` with the similar attributes:
+A failure will raise a `DriveWealth::Errors::LoginException` with the similar attributes:
 ```
 { type: :error,
   code: 500,
@@ -290,11 +280,11 @@ A failure will raise a `TradeIt::Errors::LoginException` with the similar attrib
   messages: ['Your session has expired. Please try again'] }
 ```
 
-### TradeIt::User::Logout
+### DriveWealth::User::Logout
 
 Example call:
 ```
-TradeIt::User::Logout.new(
+DriveWealth::User::Logout.new(
   token: <token from previous login>
 ).call.response
 ```
@@ -308,7 +298,7 @@ Successful logout response
   messages: [] }
 ```
 
-Failed Logout will raise a `TradeIt::Errors::LoginException` with similar attributes:
+Failed Logout will raise a `DriveWealth::Errors::LoginException` with similar attributes:
 
 ```
 { type: :error,
@@ -317,14 +307,14 @@ Failed Logout will raise a `TradeIt::Errors::LoginException` with similar attrib
   messages: ['Your session has expired. Please try again'] }
 ```
 
-### TradeIt::User::Refresh
+### DriveWealth::User::Refresh
 
 Used to stop a users token from expiring, does not send you a new token
 
 Example Call:
 
 ```
-TradeIt::User::Refresh.new(
+DriveWealth::User::Refresh.new(
   token: token
 ).call.response
 ```
@@ -343,7 +333,7 @@ Successful Response:
   messages: [] }
 ```
 
-Failed Logout will raise a `TradeIt::Errors::LoginException` with similar attributes:
+Failed Logout will raise a `DriveWealth::Errors::LoginException` with similar attributes:
 
 ```
 { type: :error,
@@ -352,12 +342,12 @@ Failed Logout will raise a `TradeIt::Errors::LoginException` with similar attrib
   messages: ['Your session has expired. Please try again'] }
 ```
 
-### TradeIt::Position::Get
+### DriveWealth::Position::Get
 
 Example Call
 
 ```
-TradeIt::Positions::Get.new(
+DriveWealth::Positions::Get.new(
   token: token,
   account_number: account_number
 ).call.response
@@ -396,7 +386,7 @@ Successful response:
   messages: ['Position successfully fetched'] }
 ```
 
-Failed Call will raise a `TradeIt::Errors::PositionException` with similar attributes:
+Failed Call will raise a `DriveWealth::Errors::PositionException` with similar attributes:
 
 ```
 { type: :error,
@@ -405,12 +395,12 @@ Failed Call will raise a `TradeIt::Errors::PositionException` with similar attri
   messages:   ['The account foooooobaaarrrr is not valid or not active anymore.'] }
 ```
 
-### TradeIt::Order::Preview
+### DriveWealth::Order::Preview
 
 Example call:
 
 ```
-TradeIt::Order::Preview.new(
+DriveWealth::Order::Preview.new(
   token: token,
   account_number: account_number,
   order_action: :buy,
@@ -476,14 +466,14 @@ Any messages in  `payload.warnings` must be displayed to the user.
 
 any messages in `payload.must_acknowledge` must be shown to the user with check boxes that they must acknowledge
 
-### TradeIt::Order::Place
+### DriveWealth::Order::Place
 
-Place an order previously reviewed by `TradeIt::Order::Preview`
+Place an order previously reviewed by `DriveWealth::Order::Preview`
 
 Example Call
 
 ```
-TradeIt::Order::Place.new(
+DriveWealth::Order::Place.new(
   token: preview_token
 ).call.response
 ```
@@ -536,7 +526,7 @@ Example response
   messages: ['Order Successfully Submitted'] }
 ```
 
-Failed Call will raise a `TradeIt::Errors::OrderException` with similar attributes:
+Failed Call will raise a `DriveWealth::Errors::OrderException` with similar attributes:
 
 ```
 {:type=>:error,
@@ -546,14 +536,14 @@ Failed Call will raise a `TradeIt::Errors::OrderException` with similar attribut
  :messages=>["Your session has expired. Please try again"]}
 ```
 
-## TradeIt::Order::Status
+## DriveWealth::Order::Status
 
 Get the status of all user orders or get the status of a single order
 
 Example Call
 
 ```
-TradeIt::Order::Place.new(
+DriveWealth::Order::Place.new(
   token: preview_token,
   account_number,
   order_number
@@ -646,14 +636,14 @@ Example response
      "status"=>:part_filled}],
   "token"=>"3384aeb24c2143f5b78ee3e1311a40eb"}
 ```
-## TradeIt::Order::Cancel
+## DriveWealth::Order::Cancel
 
-Cancel an unfulfilled order.  The payload is identical to `TradeIt::Order::Status` in that it return the order status of the cancelled order
+Cancel an unfulfilled order.  The payload is identical to `DriveWealth::Order::Status` in that it return the order status of the cancelled order
 
 Example Call
 
 ```
-TradeIt::Order::Cancel.new(
+DriveWealth::Order::Cancel.new(
   token: preview_token,
   account_number,
   order_number

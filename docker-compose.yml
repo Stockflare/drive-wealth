@@ -1,4 +1,4 @@
-tradeit:
+drivewealth:
   build: .
   command: /bin/bash
   volumes:
