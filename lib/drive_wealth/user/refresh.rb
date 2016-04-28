@@ -6,15 +6,29 @@ module DriveWealth
       end
 
       def call
-        uri =  URI.join(DriveWealth.api_uri, 'v1/user/keepSessionAlive').to_s
+        uri =  URI.join(DriveWealth.api_uri, "v1/userSessions/#{token}?action=heartbeat")
 
-        body = {
-          token: token,
-          apiKey: DriveWealth.api_key
-        }
+        req = Net::HTTP::Put.new(uri, initheader = {
+          'Content-Type' =>'application/json',
+          'x-mysolomeo-session-key' => token
+          })
 
-        result = HTTParty.post(uri.to_s, body: body, format: :json)
-        self.response = DriveWealth::User.parse_result(result)
+        resp = DriveWealth.call_api(uri, req)
+        result = JSON.parse(resp.body)
+
+        if resp.code == '200'
+          self.response = DriveWealth::User::Login.new(
+            user_id: "",
+            user_token: token
+          ).call.response
+        else
+          raise Trading::Errors::LoginException.new(
+            type: :error,
+            code: resp.code,
+            description: result['message'],
+            messages: result['message']
+          )
+        end
 
         DriveWealth.logger.info response.to_h
         self

@@ -15,8 +15,8 @@ module DriveWealth
       #
       # Parse a DriveWealth Login or Verify response into our format
       #
-      def parse_result(result)
-        if result['status'] == 'SUCCESS'
+      def parse_result(result, resp)
+        if resp.code == '200'
           #
           # User logged in without any security questions
           #
@@ -24,8 +24,8 @@ module DriveWealth
           if result['accounts']
             accounts = result['accounts'].map do |a|
               DriveWealth::Base::Account.new(
-                account_number: a['accountNumber'],
-                name: a['name']
+                account_number: a['accountNo'],
+                name: a['nickname']
               ).to_h
             end
           end
@@ -33,48 +33,79 @@ module DriveWealth
                                                  status: 200,
                                                  payload: {
                                                    type: 'success',
-                                                   token: result['token'],
+                                                   token: result['sessionKey'],
                                                    accounts: accounts
                                                  },
-                                                 messages: [result['shortMessage']].compact)
-        elsif result['status'] == 'INFORMATION_NEEDED'
-          #
-          # User Asked for security question
-          #
-          if result['challengeImage']
-            data = {
-              encoded: result['challengeImage']
-            }
-          else
-            data = {
-              question: result['securityQuestion'],
-              answers: result['securityQuestionOptions']
-            }
-          end
-          response = DriveWealth::Base::Response.new(raw: result,
-                                                 status: 200,
-                                                 payload: {
-                                                   type: 'verify',
-                                                   challenge: result['challengeImage'] ? 'image' : 'question',
-                                                   token: result['token'],
-                                                   data: data
-                                                 },
-                                                 messages: [result['shortMessage']].compact)
+                                                 messages: ['success'])
+
         else
           #
           # Login failed
           #
-          raise DriveWealth::Errors::LoginException.new(
+          raise Trading::Errors::LoginException.new(
             type: :error,
-            code: result['code'],
-            description: result['shortMessage'],
-            messages: result['longMessages']
+            code: resp.code,
+            description: result['message'],
+            messages: result['message']
           )
         end
 
         # pp(response.to_h)
         response
       end
+
+      #
+      # Get a User and Account Details from a session token
+      #
+      def get_user_from_token(token)
+        # Heartbeat the session in order to get the user id
+        result = DriveWealth::User::Refresh.new(
+          token: token
+        ).call.response
+        user_id = result.raw['userID']
+
+        if user_id
+          return result
+        else
+          raise Trading::Errors::LoginException.new(
+            type: :error,
+            code: '403',
+            description: 'User could not be found',
+            messages: 'User could not be found'
+          )
+        end
+      end
+
+      #
+      # Get an account from an account_number and token
+      #
+      def get_account(token, account_number)
+        result = get_user_from_token(token)
+        user_id = result.raw['userID']
+
+        # Find the correct account
+        accounts = result.raw['accounts'].select do |account|
+          account['accountNo'] == account_number
+        end
+
+        if accounts.count > 0
+          # Get the details of the account
+          account = accounts[0]
+
+          return {
+            user_id: user_id,
+            account: account
+          }
+        else
+          raise Trading::Errors::LoginException.new(
+            type: :error,
+            code: '403',
+            description: 'Account could not be found',
+            messages: ['Account could not be found']
+          )
+        end
+
+      end      
     end
   end
 end

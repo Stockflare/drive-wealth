@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe DriveWealth::User::Login do
-  let(:username) { 'dummy' }
-  let(:password) { 'pass' }
-  let(:broker) { :dummy }
+  let(:username) { 'stockflare.ff' }
+  let(:password) { 'passw0rd' }
+  let(:broker) { :drive_wealth }
   let!(:link) do
     DriveWealth::User::Link.new(
       username: username,
@@ -29,26 +29,26 @@ describe DriveWealth::User::Login do
     end
   end
 
-  describe 'bad credentials' do
-    let(:user_id) { 'foooooobaaarrrr' }
+  describe 'bad token' do
+    let(:user_token) { 'foooooobaaarrrr' }
     it 'throws error' do
-      expect { subject }.to raise_error(DriveWealth::Errors::LoginException)
+      expect { subject }.to raise_error(Trading::Errors::LoginException)
     end
   end
 
-  describe 'user needing security question' do
-    let(:username) { 'dummySecurity' }
-    it 'returns response with questions' do
-      expect(subject.payload.type).to eql 'verify'
-      expect(subject.payload.challenge).to eql 'question'
-      expect(subject.payload.data).to have_key :answers
-    end
-
-    describe 'image' do
-      let(:username) { 'dummySecurityImage' }
-      it 'returns image in response' do
-        expect(subject.payload.data.encoded).not_to be_empty
-      end
-    end
-  end
+  # describe 'user needing security question' do
+  #   let(:username) { 'dummySecurity' }
+  #   it 'returns response with questions' do
+  #     expect(subject.payload.type).to eql 'verify'
+  #     expect(subject.payload.challenge).to eql 'question'
+  #     expect(subject.payload.data).to have_key :answers
+  #   end
+  #
+  #   describe 'image' do
+  #     let(:username) { 'dummySecurityImage' }
+  #     it 'returns image in response' do
+  #       expect(subject.payload.data.encoded).not_to be_empty
+  #     end
+  #   end
+  # end
 end

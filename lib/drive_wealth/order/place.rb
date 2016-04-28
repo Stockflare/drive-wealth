@@ -7,52 +7,84 @@ module DriveWealth
       end
 
       def call
-        uri =  URI.join(DriveWealth.api_uri, 'v1/order/placeStockOrEtfOrder').to_s
 
-        body = {
-          token: token,
-          apiKey: DriveWealth.api_key
-        }
+        # Get the Order Details from the cache
 
-        result = HTTParty.post(uri.to_s, body: body, format: :json)
-        if result['status'] == 'SUCCESS'
-          details = result['orderInfo']
-          # binding.pry
-          payload = {
-            type: 'success',
-            ticker: details['symbol'],
-            order_action: DriveWealth.place_order_actions.key(details['action']),
-            quantity: details['quantity'].to_i,
-            expiration: DriveWealth.order_expirations.key(details['universalOrderInfo']['expiration']),
-            price_label: details['price']['type'],
-            message: result['confirmationMessage'],
-            last_price: details['price']['last'].to_f,
-            bid_price: details['price']['bid'].to_f,
-            ask_price: details['price']['ask'].to_f,
-            price_timestamp: parse_time(details['price']['timestamp']),
-            timestamp: parse_time(result['timestamp']),
-            order_number: result['orderNumber'],
-            token: result['token'],
-            price: price
-          }
+          begin
+            preview = JSON.parse(DriveWealth.cache.get(token))
+            body = {
+              accountID: preview['raw']['account']['accountID'],
+              accountNo: preview['raw']['account']['accountNo'],
+              userID: preview['raw']['user_id'],
+              accountType: preview['raw']['account']['accountType'],
+              ordType: DriveWealth.price_types[preview['raw']['price_type'].to_sym],
+              side: DriveWealth.order_actions[preview['raw']['order_action'].to_sym],
+              instrumentID: preview['raw']['instrument']['instrumentID'],
+              orderQty: preview['raw']['quantity'].to_f,
+              comment: ""
+            }
 
-          self.response = DriveWealth::Base::Response.new(
-            raw: result,
-            payload: payload,
-            messages: [result['shortMessage']],
-            status: 200
-          )
-        else
-          #
-          # Order failed
-          #
-          raise DriveWealth::Errors::OrderException.new(
-            type: :error,
-            code: result['code'],
-            description: result['shortMessage'],
-            messages: result['longMessages']
-          )
-        end
+            body[:price] = price if preview['raw']['price_type'].to_sym == :stop_market
+            body[:limitPrice] = price if preview['raw']['price_type'].to_sym == :limit
+
+            uri =  URI.join(DriveWealth.api_uri, 'v1/orders')
+            req = Net::HTTP::Post.new(uri, initheader = {
+              'Content-Type' =>'application/json',
+              'x-mysolomeo-session-key' => token,
+              'Accept' => 'application/json'
+              })
+              req.body = body.to_json
+
+            resp = DriveWealth.call_api(uri, req)
+
+            result = JSON.parse(resp.body)
+            if resp.code == '200'
+              order_id = result['orderID']
+
+              # Now get the status of the order
+
+              payload = {
+                type: 'success',
+                ticker: preview['raw']['ticker'],
+                order_action: DriveWealth.place_order_actions.key(result['side']),
+                quantity: result['leavesQty'].to_f,
+                expiration: :day,
+                price_label: "",
+                message: 'success',
+                last_price: preview['raw']['instrument']['lastTrade'].to_f,
+                bid_price: preview['raw']['instrument']['rateBid'].to_f,
+                ask_price: preview['raw']['instrument']['rateAsk'].to_f,
+                price_timestamp: Time.now.utc.to_i,
+                timestamp: Time.now.utc.to_i,
+                order_number: result['orderNo'],
+                token: token,
+                price: price
+              }
+
+              self.response = DriveWealth::Base::Response.new(
+                raw: result,
+                payload: payload,
+                messages: ['success'],
+                status: 200
+              )
+            else
+              raise Trading::Errors::OrderException.new(
+                type: :error,
+                code: resp.code,
+                description: result['message'],
+                messages: result['message']
+              )
+            end
+
+          rescue Memcached::NotFound
+            raise Trading::Errors::OrderException.new(
+              type: :error,
+              code: "403",
+              description: 'Order could not be found',
+              messages: 'Order could not be found'
+            )
+          end
+
         DriveWealth.logger.info response.to_h
         self
       end

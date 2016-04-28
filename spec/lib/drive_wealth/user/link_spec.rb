@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe DriveWealth::User::Link do
-  let(:username) { 'dummy' }
-  let(:password) { 'pass' }
-  let(:broker) { :dummy }
+  let(:username) { 'stockflare.ff' }
+  let(:password) { 'passw0rd' }
+  let(:broker) { :drive_wealth }
 
   subject do
     DriveWealth::User::Link.new(
@@ -25,7 +25,7 @@ describe DriveWealth::User::Link do
   describe 'bad credentials' do
     let(:username) { 'foooooobaaarrrr' }
     it 'throws error' do
-      expect { subject }.to raise_error(DriveWealth::Errors::LoginException)
+      expect { subject }.to raise_error(Trading::Errors::LoginException)
     end
   end
 end

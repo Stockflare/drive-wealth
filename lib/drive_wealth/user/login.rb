@@ -7,17 +7,18 @@ module DriveWealth
       end
 
       def call
-        uri =  URI.join(DriveWealth.api_uri, 'v1/user/authenticate').to_s
+        uri =  URI.join(DriveWealth.api_uri, "v1/userSessions/#{user_token}")
 
-        body = {
-          userId: user_id,
-          userToken: user_token,
-          apiKey: DriveWealth.api_key
-        }
+        req = Net::HTTP::Get.new(uri, initheader = {
+          'Content-Type' =>'application/json',
+          'x-mysolomeo-session-key' => user_token
+          })
 
-        result = HTTParty.post(uri.to_s, body: body, format: :json)
+        resp = DriveWealth.call_api(uri, req)
 
-        self.response = DriveWealth::User.parse_result(result)
+        result = JSON.parse(resp.body)
+
+        self.response = DriveWealth::User.parse_result(result, resp)
 
         DriveWealth.logger.info response.to_h
         self

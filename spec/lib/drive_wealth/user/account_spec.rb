@@ -1,10 +1,9 @@
 require 'spec_helper'
 
 describe DriveWealth::User::Account do
-  let(:username) { 'dummy' }
-  let(:password) { 'pass' }
-  let(:broker) { :dummy }
-  let(:answer) { 'tradingticket' }
+  let(:username) { 'stockflare.ff' }
+  let(:password) { 'passw0rd' }
+  let(:broker) { :drive_wealth }
   let!(:user) do
     DriveWealth::User::LinkAndLogin.new(
       username: username,
@@ -24,19 +23,19 @@ describe DriveWealth::User::Account do
     end
     it 'returns details' do
       expect(subject.status).to eql 200
-      expect(subject.payload.cash).to be > 0
+      expect(subject.payload.cash).not_to eql 0.0
       expect(subject.payload.token).not_to be_empty
-      expect(subject.payload.power).to be > 0
-      expect(subject.payload.day_return).to be > 0
-      expect(subject.payload.day_return_percent).to be > 0
-      expect(subject.payload.total_return).to be > 0
-      expect(subject.payload.total_return_percent).to be > 0
-      expect(subject.payload.value).to be > 0
+      expect(subject.payload.power).not_to eql 0.0
+      expect(subject.payload.day_return).not_to eql 0.0
+      expect(subject.payload.day_return_percent).not_to eql 0.0
+      expect(subject.payload.total_return).not_to eql  0.0
+      expect(subject.payload.total_return_percent).not_to eql 0.0
+      expect(subject.payload.value).not_to eql 0.0
     end
     describe 'bad token' do
       let(:token) { 'foooooobaaarrrr' }
       it 'throws error' do
-        expect { subject }.to raise_error(DriveWealth::Errors::LoginException)
+        expect { subject }.to raise_error(Trading::Errors::LoginException)
       end
     end
   end

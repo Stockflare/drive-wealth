@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe DriveWealth::User::Refresh do
-  let(:username) { 'dummy' }
-  let(:password) { 'pass' }
-  let(:broker) { :dummy }
+  let(:username) { 'stockflare.ff' }
+  let(:password) { 'passw0rd' }
+  let(:broker) { :drive_wealth }
   let!(:user) do
     DriveWealth::User::LinkAndLogin.new(
       username: username,
@@ -31,7 +31,7 @@ describe DriveWealth::User::Refresh do
   describe 'bad token' do
     let(:token) { 'foooooobaaarrrr' }
     it 'throws error' do
-      expect { subject }.to raise_error(DriveWealth::Errors::LoginException)
+      expect { subject }.to raise_error(Trading::Errors::LoginException)
     end
   end
 end

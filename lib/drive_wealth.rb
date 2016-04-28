@@ -4,16 +4,16 @@ require 'multi_json'
 require 'yajl/json_gem'
 require 'virtus'
 require 'httparty'
+require 'trading'
 
 module DriveWealth
   autoload :Base, 'drive_wealth/base'
   autoload :User, 'drive_wealth/user'
-  autoload :Errors, 'drive_wealth/errors'
   autoload :Positions, 'drive_wealth/positions'
   autoload :Order, 'drive_wealth/order'
 
   class << self
-    attr_writer :logger, :api_uri, :api_key
+    attr_writer :logger, :api_uri, :referral_code, :language, :cache
 
     # Helper to configure .
     #
@@ -40,27 +40,17 @@ module DriveWealth
     # DriveWealth brokers as symbols
     def brokers
       {
-        td: 'TD',
-        etrade: 'Etrade',
-        scottrade: 'Scottrade',
-        fidelity: 'Fidelity',
-        schwab: 'Schwab',
-        trade_station: 'TradeStation',
-        robinhood: 'Robinhood',
-        options_house: 'OptionsHouse',
-        tradier: 'Tradier',
-        trade_king: 'TradeKing',
-        dummy: 'Dummy'
+        drive_wealth: 'DriveWealth'
       }
     end
 
     # DriveWealth order actions
     def order_actions
       {
-        buy: 'buy',
-        sell: 'sell',
-        buy_to_cover: 'buyToCover',
-        sell_short: 'sellShort'
+        buy: 'B',
+        sell: 'S',
+        buy_to_cover: 'FORCE_ERROR',
+        sell_short: 'FORCE_ERROR'
       }
     end
 
@@ -89,20 +79,20 @@ module DriveWealth
 
     def place_order_actions
       {
-        buy: 'Buy',
-        sell: 'Sell',
-        buy_to_cover: 'BuyToCover',
-        sell_short: 'SellShort'
+        buy: 'B',
+        sell: 'S',
+        buy_to_cover: 'FORCE_ERROR',
+        sell_short: 'FORCE_ERROR'
       }
     end
 
     # DriveWealth price types
     def price_types
       {
-        market: 'market',
-        limit: 'limit',
-        stop_market: 'stopMarket',
-        stop_limit: 'stopLimit'
+        market: '1',
+        limit: '2',
+        stop_market: '3',
+        stop_limit: 'FORCE_ERROR'
       }
     end
 
@@ -134,7 +124,7 @@ module DriveWealth
       if @api_uri
         return @api_uri
       else
-        raise DriveWealth::Errors::ConfigException.new(
+        raise Trading::Errors::ConfigException.new(
           type: :error,
           code: 500,
           description: 'api_uri missing',
@@ -143,15 +133,41 @@ module DriveWealth
       end
     end
 
-    def api_key
-      if @api_key
-        return @api_key
+    def referral_code
+      if @referral_code
+        return @referral_code
       else
-        raise DriveWealth::Errors::ConfigException.new(
+        raise Trading::Errors::ConfigException.new(
           type: :error,
           code: 500,
-          description: 'api_key missing',
-          messages: ['api_key configuration variable has not been set']
+          description: 'referral_code missing',
+          messages: ['referral_code configuration variable has not been set']
+        )
+      end
+    end
+
+    def language
+      if @language
+        return @language
+      else
+        raise Trading::Errors::ConfigException.new(
+          type: :error,
+          code: 500,
+          description: 'language missing',
+          messages: ['language configuration variable has not been set']
+        )
+      end
+    end
+
+    def cache
+      if @cache
+        return @cache
+      else
+        raise Trading::Errors::ConfigException.new(
+          type: :error,
+          code: 500,
+          description: 'cache missing',
+          messages: ['cache configuration variable has not been set']
         )
       end
     end
@@ -161,5 +177,14 @@ module DriveWealth
         log.progname = name
       end
     end
+
+    def call_api(uri, req)
+      Net::HTTP.start(uri.hostname, uri.port,
+                                 use_ssl: uri.scheme == 'https') do |http|
+        http.request(req)
+      end
+    end
+
+
   end
 end

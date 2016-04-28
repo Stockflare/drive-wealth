@@ -18,7 +18,7 @@ It is expected that most Stockflare use cases will only use the `response.payloa
 
 Additionally a `response.raw` is provided that contains the raw DriveWealth response.  This is provided for development and debug purposes only.  Upstream users should only rely on the `response.payload` and `response.messages`.  This will allow us to deal with minor breaking changes in the DriveWealth API (which is currently in QA) without having to make code changes in upstream users.
 
-All Error cases are handled by raising a subclass of `DriveWealth::Errors::DriveWealthException`, this object exposes a number of attributes that can you can `to_h` to the consumer.
+All Error cases are handled by raising a subclass of `Trading::Errors::DriveWealthException`, this object exposes a number of attributes that can you can `to_h` to the consumer.
 
 ### Configuration Values
 
@@ -89,21 +89,70 @@ DriveWealth::User::Link.new(
 Successful response:
 
 ```
-{ raw:   { 'longMessages' => nil,
-           'shortMessage' => 'User succesfully linked',
-           'status' => 'SUCCESS',
-           'token' => '86f1546f42a44f17a60d59937b261397',
-           'userId' => '0bf145522335273053ca',
-           'userToken' =>
-    '6j6rx91SaeuYsHHwxcW%2BsUGn5ZN%2FvfTsmWGLGnr4oPI%3DFahzxUqAhkLGhOyR%2FpxgKw%3D%3D' },
-  status: 200,
-  payload:   { type: 'success',
-               user_id: '0bf145522335273053ca',
-               user_token:     '6j6rx91SaeuYsHHwxcW%2BsUGn5ZN%2FvfTsmWGLGnr4oPI%3DFahzxUqAhkLGhOyR%2FpxgKw%3D%3D' },
-  messages: ['User succesfully linked'] }
+{:raw=>
+  {"appTypeID"=>28,
+   "commissionRate"=>2.99,
+   "loginState"=>1,
+   "referralCode"=>"LTJVND",
+   "sessionKey"=>
+    "628f9e2b-6acb-4d6f-9fff-63c93d23d9d0.2016-04-28T09:03:21.908Z",
+   "userID"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0",
+   "wlpID"=>"DW",
+   "accounts"=>
+    [{"accountID"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0.1461255011955",
+      "accountNo"=>"DPNL000006",
+      "userID"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0",
+      "accountType"=>1,
+      "cash"=>10000,
+      "currencyID"=>"USD",
+      "defaultGoalID"=>"19e2709a-94f1-4bbd-9265-e5981d2b57f2",
+      "freeTradeBalance"=>0,
+      "goodFaithViolations"=>0,
+      "ibID"=>"152b3a46-1bc4-4d1e-93a5-ca6f79110d14",
+      "interestFree"=>false,
+      "margin"=>1,
+      "nickname"=>"Shane's Practice Account",
+      "openedWhen"=>"2016-04-21T16:10:11Z",
+      "goals"=>[],
+      "orders"=>[],
+      "patternDayTrades"=>0,
+      "positions"=>[],
+      "status"=>2,
+      "tradingType"=>"C",
+      "createdWhen"=>"2016-04-21T16:10:11.955Z",
+      "bodMoneyMarket"=>10000,
+      "bodEquityValue"=>0,
+      "bodCashAvailForWith"=>10000,
+      "bodCashAvailForTrading"=>10000,
+      "bodUpdatedWhen"=>"2016-04-28T07:18:06.602Z",
+      "rtCashAvailForTrading"=>10000.0,
+      "rtCashAvailForWith"=>10000.0,
+      "commissionSchedule"=>
+       {"baseRate"=>2.99,
+        "baseShares"=>239,
+        "excessRate"=>0.0125,
+        "fractionalRate"=>0.99},
+      "accountMgmtType"=>0,
+      "bodSmaBal"=>0,
+      "bodExReq"=>0,
+      "bodBpx"=>0,
+      "bodTcashBal"=>0,
+      "bodEquity"=>0,
+      "bodHoReq"=>0,
+      "bodMoneyMkt"=>0,
+      "longOnly"=>true}],
+   "instruments"=>[],
+   "guest"=>false},
+ :status=>200,
+ :payload=>
+  {"type"=>"success",
+   "user_id"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0",
+   "user_token"=>
+    "628f9e2b-6acb-4d6f-9fff-63c93d23d9d0.2016-04-28T09:03:21.908Z"},
+ :messages=>["success"]}
 ```
 
-Link failure will raise a `DriveWealth::Errors::LoginException` with the following attributes:
+Link failure will raise a `Trading::Errors::LoginException` with the following attributes:
 
 ```
 { type: :error,
@@ -127,77 +176,83 @@ DriveWealth::User::Login.new(
 Successful response without security question:
 
 ```
-{ raw:   { 'accounts' =>
-    [{ 'account_number' => 'brkAcct1',
-       'name' => 'Individual Account (XX878977484)' }],
-           'longMessages' => nil,
-           'shortMessage' => 'Credential Successfully Validated',
-           'status' => 'SUCCESS',
-           'token' => 'ce15f0eb7a9a473eb40687cdf3150479' },
-  status: 200,
-  payload:   { type: 'success',
-               token: 'ce15f0eb7a9a473eb40687cdf3150479',
-               accounts:     [{"account_number"=>"brkAcct1",
-                "name"=>"Individual Account (XX878977484)",
-                "cash"=>nil,
-                "power"=>nil,
-                "day_return"=>nil,
-                "day_return_percent"=>nil,
-                "total_return"=>nil,
-                "total_return_percent"=>nil,
-                "value"=>nil}] },
-  messages: ['Credential Successfully Validated'] }
+{:raw=>
+  {"appTypeID"=>28,
+   "appVersion"=>"0.1.9",
+   "commissionRate"=>2.99,
+   "heartbeatWhen"=>"2016-04-28T09:36:19.243Z",
+   "ipAddress"=>"86.3.238.56",
+   "loginState"=>1,
+   "languageID"=>"en_US",
+   "loginWhen"=>"2016-04-28T09:36:19.243Z",
+   "osType"=>"Linux",
+   "osVersion"=>"Ubuntu 64",
+   "referralCode"=>"LTJVND",
+   "scrRes"=>"1920x1080",
+   "sessionKey"=>
+    "628f9e2b-6acb-4d6f-9fff-63c93d23d9d0.2016-04-28T09:36:19.243Z",
+   "userID"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0",
+   "wlpID"=>"DW",
+   "accounts"=>
+    [{"accountID"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0.1461255011955",
+      "accountNo"=>"DPNL000006",
+      "userID"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0",
+      "accountType"=>1,
+      "cash"=>10000,
+      "currencyID"=>"USD",
+      "defaultGoalID"=>"19e2709a-94f1-4bbd-9265-e5981d2b57f2",
+      "freeTradeBalance"=>0,
+      "goodFaithViolations"=>0,
+      "ibID"=>"152b3a46-1bc4-4d1e-93a5-ca6f79110d14",
+      "interestFree"=>false,
+      "margin"=>1,
+      "nickname"=>"Shane's Practice Account",
+      "openedWhen"=>"2016-04-21T16:10:11Z",
+      "goals"=>[],
+      "orders"=>[],
+      "patternDayTrades"=>0,
+      "positions"=>[],
+      "status"=>2,
+      "tradingType"=>"C",
+      "createdWhen"=>"2016-04-21T16:10:11.955Z",
+      "bodMoneyMarket"=>10000,
+      "bodEquityValue"=>0,
+      "bodCashAvailForWith"=>10000,
+      "bodCashAvailForTrading"=>10000,
+      "bodUpdatedWhen"=>"2016-04-28T07:18:06.602Z",
+      "rtCashAvailForTrading"=>10000.0,
+      "rtCashAvailForWith"=>10000.0,
+      "accountMgmtType"=>0,
+      "bodSmaBal"=>0,
+      "bodExReq"=>0,
+      "bodBpx"=>0,
+      "bodTcashBal"=>0,
+      "bodEquity"=>0,
+      "bodHoReq"=>0,
+      "bodMoneyMkt"=>0,
+      "longOnly"=>true}],
+   "instruments"=>[],
+   "guest"=>false},
+ :status=>200,
+ :payload=>
+  {"type"=>"success",
+   "token"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0.2016-04-28T09:36:19.243Z",
+   "accounts"=>
+    [{"account_number"=>"DPNL000006",
+      "name"=>"Shane's Practice Account",
+      "cash"=>nil,
+      "power"=>nil,
+      "day_return"=>nil,
+      "day_return_percent"=>nil,
+      "total_return"=>nil,
+      "total_return_percent"=>nil,
+      "value"=>nil}]},
+ :messages=>["success"]}
 ```
 
-Successful response requesting security question
+Security Questions are not supported in DriveWealth
 
-```
-{ raw:   { 'challengeImage' => nil,
-           'errorFields' => nil,
-           'informationLongMessage' => nil,
-           'informationShortMessage' => 'Send',
-           'informationType' => 'SECURITY_QUESTION',
-           'longMessages' => nil,
-           'securityQuestion' => "What is your mother's maiden name",
-           'securityQuestionOptions' => [],
-           'shortMessage' => nil,
-           'status' => 'INFORMATION_NEEDED',
-           'token' => '7994ee5d86bc4a168d450f268a7cd17b' },
-  status: 200,
-  payload:   { type: 'verify',
-               challenge: 'question',
-               token: '7994ee5d86bc4a168d450f268a7cd17b',
-               data: { question: "What is your mother's maiden name", answers: [] } },
-  messages: [] }
-```
-
-Successful response requesting image style security question
-
-The `encoded` image is Base64 encoded
-
-```
-{ raw:   { 'challengeImage' =>
-    'iVBORw0KGgoAAAANSUhEUgAAAc4AA....',
-           'errorFields' => nil,
-           'informationLongMessage' => nil,
-           'informationShortMessage' => nil,
-           'informationType' => 'SECURITY_QUESTION',
-           'longMessages' => nil,
-           'securityQuestion' =>
-    'Two card index numbers are shown in the image below. Please enter them without spaces to proceed.',
-           'securityQuestionOptions' => [],
-           'shortMessage' => nil,
-           'status' => 'INFORMATION_NEEDED',
-           'token' => '99db99b421df419c9d02907dff146e2c' },
-  status: 200,
-  payload:   { type: 'verify',
-               challenge: 'image',
-               token: '99db99b421df419c9d02907dff146e2c',
-               data:     { encoded:       'iVBORw0KGgoAAAANSUhEUgAAAc4AAAA....' } },
-  messages: [] }
-```
-
-Login failure will raise a `DriveWealth::Errors::LoginException` with the following attributes:
+Login failure will raise a `Trading::Errors::LoginException` with the following attributes:
 
 ```
 { type: :error,
@@ -207,6 +262,8 @@ Login failure will raise a `DriveWealth::Errors::LoginException` with the follow
 ```
 
 ### DriveWealth::User::Verify
+
+DriveWealth does not support security questions.  A call to this endpoint will return results identical to `DriveWealth::User::Login` regardless of the security answer provided
 
 Example Call
 
@@ -221,7 +278,7 @@ All success responses are identical to `DriveWealth::User::Login`
 
 If the user provides a bad answer then the response will be a success asking another question.
 
-A failure will raise a `DriveWealth::Errors::LoginException` with the similar attributes:
+A failure will raise a `Trading::Errors::LoginException` with the similar attributes:
 ```
 { type: :error,
   code: 500,
@@ -272,7 +329,7 @@ Example response
 ```
 
 
-A failure will raise a `DriveWealth::Errors::LoginException` with the similar attributes:
+A failure will raise a `Trading::Errors::LoginException` with the similar attributes:
 ```
 { type: :error,
   code: 500,
@@ -298,7 +355,7 @@ Successful logout response
   messages: [] }
 ```
 
-Failed Logout will raise a `DriveWealth::Errors::LoginException` with similar attributes:
+Failed Logout will raise a `Trading::Errors::LoginException` with similar attributes:
 
 ```
 { type: :error,
@@ -319,21 +376,9 @@ DriveWealth::User::Refresh.new(
 ).call.response
 ```
 
-Successful Response:
+Response is identical to `Trade::User::Login`
 
-```
-{ raw:   { 'longMessages' => nil,
-           'shortMessage' => nil,
-           'status' => 'SUCCESS',
-           'token' => 'ed34e745c7714be6936370cb1026f33e' },
-  status: 200,
-  payload:   { type: 'success',
-               token: 'ed34e745c7714be6936370cb1026f33e',
-               accounts: nil },
-  messages: [] }
-```
-
-Failed Logout will raise a `DriveWealth::Errors::LoginException` with similar attributes:
+Failed Logout will raise a `Trading::Errors::LoginException` with similar attributes:
 
 ```
 { type: :error,
@@ -386,7 +431,7 @@ Successful response:
   messages: ['Position successfully fetched'] }
 ```
 
-Failed Call will raise a `DriveWealth::Errors::PositionException` with similar attributes:
+Failed Call will raise a `Trading::Errors::PositionException` with similar attributes:
 
 ```
 { type: :error,
@@ -526,7 +571,7 @@ Example response
   messages: ['Order Successfully Submitted'] }
 ```
 
-Failed Call will raise a `DriveWealth::Errors::OrderException` with similar attributes:
+Failed Call will raise a `Trading::Errors::OrderException` with similar attributes:
 
 ```
 {:type=>:error,

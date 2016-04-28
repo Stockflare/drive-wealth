@@ -30,7 +30,7 @@ describe DriveWealth::User::Logout do
   describe 'bad logout' do
     let(:token) { 'foooooobaaarrrr' }
     it 'throws error' do
-      expect { subject }.to raise_error(DriveWealth::Errors::LoginException)
+      expect { subject }.to raise_error(Trading::Errors::LoginException)
     end
   end
 end

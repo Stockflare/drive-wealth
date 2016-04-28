@@ -1,5 +1,11 @@
 module DriveWealth
   module User
+    #
+    # Unlike Tradeit getting these result is a multi step process
+    # First you need to get the Users account in order to convert
+    # an account_number into an account ID.  Then you need to get
+    # the Account Blotter and sum up all the Equity positions.
+    #
     class Account < DriveWealth::Base
       values do
         attribute :token, String
@@ -7,46 +13,67 @@ module DriveWealth
       end
 
       def call
-        uri =  URI.join(DriveWealth.api_uri, 'v1/balance/getAccountOverview').to_s
 
-        body = {
-          token: token,
-          accountNumber: account_number,
-          apiKey: DriveWealth.api_key
-        }
+        details = DriveWealth::User.get_account(token, account_number)
+        account = details[:account]
+        user_id = details[:user_id]
 
-        result = HTTParty.post(uri.to_s, body: body, format: :json)
-        if result['status'] == 'SUCCESS'
+        uri =  URI.join(DriveWealth.api_uri, "v1/users/#{user_id}/accountSummary/#{account['accountID']}")
+        req = Net::HTTP::Get.new(uri, initheader = {
+          'Content-Type' =>'application/json',
+          'x-mysolomeo-session-key' => token
+          })
 
+        resp = DriveWealth.call_api(uri, req)
+
+        result = JSON.parse(resp.body)
+        if resp.code == '200'
           payload = {
             type: 'success',
-            cash: result['availableCash'].to_f,
-            power: result['buyingPower'].to_f,
-            day_return: result['dayAbsoluteReturn'].to_f,
-            day_return_percent: result['dayPercentReturn'].to_f,
-            total_return: result['totalAbsoluteReturn'].to_f,
-            total_return_percent: result['totalPercentReturn'].to_f,
-            value: result['totalValue'].to_f,
-            token: result['token']
+            cash: result['cash']['cashBalance'].to_f,
+            power: result['cash']['cashAvailableForTrade'].to_f,
+            day_return: 0.0,
+            day_return_percent: 0.0,
+            total_return: 0.0,
+            total_return_percent: 0.0,
+            value: result['equity']['equityValue'].to_f,
+            token: token
           }
+
+          # Deal with positions to create summary values
+          total_cost_basis = 0.0
+          total_return = 0.0
+          total_day_return = 0.0
+          total_market_value = 0.0
+          total_close_market_value = 0.0
+          result['equity']['equityPositions'].each do |position|
+            total_cost_basis = total_cost_basis + position['costBasis'].to_f
+            total_return = total_return + position['unrealizedPL'].to_f
+            total_day_return = total_day_return + position['unrealizedDayPL'].to_f
+            total_market_value = total_market_value + (position['mktPrice'].to_f * position['openQty'].to_f)
+            total_close_market_value = total_close_market_value + (position['priorClose'].to_f * position['openQty'].to_f)
+          end
+
+          payload[:day_return] = total_day_return.round(4)
+          payload[:total_return] = total_return.round(4)
+          payload[:total_return_percent] = (total_return / total_cost_basis).round(4)
+          payload[:day_return_percent] = (total_day_return / (total_market_value - total_day_return)).round(4)
 
           self.response = DriveWealth::Base::Response.new(
             raw: result,
             payload: payload,
-            messages: Array(result['shortMessage']),
+            messages: Array('success'),
             status: 200
           )
         else
-          #
-          # Status failed
-          #
-          raise DriveWealth::Errors::LoginException.new(
+          raise Trading::Errors::LoginException.new(
             type: :error,
-            code: result['code'],
-            description: result['shortMessage'],
-            messages: result['longMessages']
+            code: resp.code,
+            description: result['message'],
+            messages: result['message']
           )
         end
+
         DriveWealth.logger.info response.to_h
         self
       end
