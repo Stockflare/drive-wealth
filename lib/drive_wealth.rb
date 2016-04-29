@@ -25,12 +25,12 @@ module DriveWealth
     # DriveWealth order statuses
     def order_statuses
       {
-        'PENDING' => :pending,
+        '0' => :pending,
         'OPEN' => :open,
-        'FILLED' => :filled,
-        'PART_FILLED' => :part_filled,
-        'CANCELED' => :cancelled,
-        'REJECTED' => :rejected,
+        '2' => :filled,
+        '1' => :part_filled,
+        '4' => :cancelled,
+        '8' => :rejected,
         'NOT_FOUND' => :not_found,
         'PENDING_CANCEL' => :pending_cancel,
         'EXPIRED' => :expired
@@ -65,15 +65,8 @@ module DriveWealth
 
     def order_status_actions
       {
-        'BUY' => :buy,
-        'BUY_OPEN' => :buy_open,
-        'BUY_CLOSE' => :buy_close,
-        'BUY_TO_COVER' => :buy_to_cover,
-        'SELL' => :sell,
-        'SELL_OPEN' => :sell_open,
-        'SELL_CLOSE' => :sell_close,
-        'SELL_SHORT' => :sell_short,
-        'UNKNOWN' => :unknown
+        'B' => :buy,
+        'S' => :sell
       }
     end
 

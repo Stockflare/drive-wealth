@@ -6,11 +6,11 @@ module DriveWealth
       end
 
       def call
-        uri =  URI.join(DriveWealth.api_uri, "v1/userSessions/#{user_token}")
+        uri =  URI.join(DriveWealth.api_uri, "v1/userSessions/#{token}")
 
         req = Net::HTTP::Delete.new(uri, initheader = {
           'Content-Type' =>'application/json',
-          'x-mysolomeo-session-key' => user_token
+          'x-mysolomeo-session-key' => token
           })
 
         resp = DriveWealth.call_api(uri, req)
@@ -18,7 +18,6 @@ module DriveWealth
         result = JSON.parse(resp.body)
 
         if resp.code == '200'
-          binding.pry
           self.response = DriveWealth::Base::Response.new(raw: result,
                                                       status: 200,
                                                       payload: {

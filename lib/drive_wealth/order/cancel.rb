@@ -8,41 +8,56 @@ module DriveWealth
       end
 
       def call
-        uri =  URI.join(DriveWealth.api_uri, 'v1/order/cancelOrder').to_s
 
-        body = {
-          token: token,
-          accountNumber: account_number,
-          orderNumber: order_number,
-          apiKey: DriveWealth.api_key
-        }
+        blotter = DriveWealth::User::Account.new(token: token, account_number: account_number).call.response
+        orders = blotter.raw['orders'].select{|o| o['orderNo'] == order_number}
+        if orders.count > 0
+          order = orders[0]
 
-        result = HTTParty.post(uri.to_s, body: body, format: :json)
-        if result['status'] == 'SUCCESS'
+          order_payload = DriveWealth::Order::Status.new(token: token, account_number: account_number, order_number: order_number).call.response.payload
+          order_payload['orders'][0][:status] = :cancelled
 
-          payload = {
-            type: 'success',
-            orders: DriveWealth::Order.parse_order_details(result['orderStatusDetailsList']),
-            token: result['token']
-          }
+          uri =  URI.join(DriveWealth.api_uri, "v1/orders/#{order['orderID']}")
 
-          self.response = DriveWealth::Base::Response.new(
-            raw: result,
-            payload: payload,
-            messages: Array(result['shortMessage']),
-            status: 200
-          )
+          req = Net::HTTP::Delete.new(uri, initheader = {
+            'Content-Type' =>'application/json',
+            'x-mysolomeo-session-key' => token
+            })
+
+          resp = DriveWealth.call_api(uri, req)
+
+          result = JSON.parse(resp.body)
+
+          if resp.code == '200'
+            payload = {
+              type: 'success',
+              orders: order_payload['orders'],
+              token: token
+            }
+
+            self.response = TradeIt::Base::Response.new(
+              raw: result,
+              payload: payload,
+              messages: Array(result['message']),
+              status: 200
+            )
+          else
+            raise Trading::Errors::OrderException.new(
+              type: :error,
+              code: resp.code,
+              description: result['message'],
+              messages: result['message']
+            )
+          end
         else
-          #
-          # Status failed
-          #
           raise Trading::Errors::OrderException.new(
             type: :error,
-            code: result['code'],
-            description: result['shortMessage'],
-            messages: result['longMessages']
+            code: '403',
+            description: 'No Orders found',
+            messages: ['No Orders found']
           )
         end
+
         DriveWealth.logger.info response.to_h
         self
       end

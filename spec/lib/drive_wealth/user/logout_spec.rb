@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe DriveWealth::User::Logout do
-  let(:username) { 'dummy' }
-  let(:password) { 'pass' }
-  let(:broker) { :dummy }
+  let(:username) { 'stockflare.ff' }
+  let(:password) { 'passw0rd' }
+  let(:broker) { :drive_wealth }
   let!(:user) do
     DriveWealth::User::LinkAndLogin.new(
       username: username,

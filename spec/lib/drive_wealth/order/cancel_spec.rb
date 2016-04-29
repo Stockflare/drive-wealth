@@ -1,10 +1,9 @@
 require 'spec_helper'
 
 describe DriveWealth::Order::Cancel do
-  let(:username) { 'dummy' }
-  let(:password) { 'pass' }
-  let(:broker) { :dummy }
-  let(:answer) { 'tradingticket' }
+  let(:username) { 'stockflare.ff' }
+  let(:password) { 'passw0rd' }
+  let(:broker) { :drive_wealth }
   let!(:user) do
     DriveWealth::User::LinkAndLogin.new(
       username: username,
@@ -14,15 +13,51 @@ describe DriveWealth::Order::Cancel do
   end
   let(:token) { user.token }
   let(:account_number) { user.accounts[0].account_number }
+  let(:order_action) { :buy }
+  let(:price_type) { :market }
+  let(:order_expiration) { :day }
+  let(:quantity) { 10 }
+  let(:base_order) do
+    {
+      token: token,
+      account_number: account_number,
+      order_action: order_action,
+      quantity: quantity,
+      ticker: 'aapl',
+      price_type: price_type,
+      expiration: order_expiration
+    }
+  end
+  let(:order_extras) do
+    {}
+  end
+
+  let(:price) { 123.45 }
+
+  let!(:preview) do
+    DriveWealth::Order::Preview.new(
+      base_order.merge(order_extras)
+    ).call.response.payload
+  end
+
+  let(:preview_token) { preview.token }
+
+  let(:placed_order) do
+    DriveWealth::Order::Place.new(
+      token: preview_token,
+      price: price
+    ).call.response.payload
+  end
 
   describe 'Cancel Order' do
     let(:orders) do
       DriveWealth::Order::Status.new(
         token: token,
-        account_number: account_number
+        account_number: account_number,
+        order_number: order_number
       ).call.response.payload.orders
     end
-    let(:order_number) { orders[1].order_number }
+    let(:order_number) { placed_order.order_number }
 
     subject do
       DriveWealth::Order::Cancel.new(
