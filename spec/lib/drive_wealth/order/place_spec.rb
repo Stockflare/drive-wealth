@@ -58,7 +58,7 @@ describe DriveWealth::Order::Place do
       expect(subject.payload.order_action).to eql :buy
       expect(subject.payload.quantity).to eql 10.0
       expect(subject.payload.expiration).to eql :day
-      # expect(subject.payload.price_label).to eql 'Market'
+      expect(subject.payload.price_label).to eql 'Market'
       # expect(subject.payload.message).to eql subject.raw['confirmationMessage']
       expect(subject.payload.last_price).to be > 0
       expect(subject.payload.bid_price).to be > 0
@@ -101,6 +101,7 @@ describe DriveWealth::Order::Place do
         expect(subject.status).to eql 200
         expect(subject.payload.type).to eql 'success'
         expect(subject.raw['limitPrice']).to eql price
+        expect(subject.payload.price_label).to eql 'Limit'
       end
     end
 
@@ -115,6 +116,7 @@ describe DriveWealth::Order::Place do
         expect(subject.status).to eql 200
         expect(subject.payload.type).to eql 'success'
         expect(subject.raw['limitPrice']).to eql 0.0
+        expect(subject.payload.price_label).to eql 'Stop on Quote'
       end
     end
 

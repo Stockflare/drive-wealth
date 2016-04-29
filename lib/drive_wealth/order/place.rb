@@ -40,7 +40,16 @@ module DriveWealth
           if resp.code == '200'
             order_id = result['orderID']
 
-            # Now get the status of the order
+            case preview['raw']['price_type'].to_sym
+            when :market
+              price_label = 'Market'
+            when :limit
+              price_label = 'Limit'
+            when :stop_market
+              price_label = 'Stop on Quote'
+            else
+              price_label = 'Unknown'
+            end
 
             payload = {
               type: 'success',
@@ -48,7 +57,7 @@ module DriveWealth
               order_action: DriveWealth.place_order_actions.key(result['side']),
               quantity: result['leavesQty'].to_f,
               expiration: :day,
-              price_label: '',
+              price_label: price_label,
               message: 'success',
               last_price: preview['raw']['instrument']['lastTrade'].to_f,
               bid_price: preview['raw']['instrument']['rateBid'].to_f,
