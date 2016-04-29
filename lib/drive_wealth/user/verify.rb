@@ -9,7 +9,7 @@ module DriveWealth
 
       def call
         self.response = DriveWealth::User::Login.new(
-          user_id: "",
+          user_id: '',
           user_token: token
         ).call.response
 

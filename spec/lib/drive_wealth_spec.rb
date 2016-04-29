@@ -54,5 +54,4 @@ describe DriveWealth do
   #     expect { DriveWealth.cache }.to raise_error(Trading::Errors::ConfigException)
   #   end
   # end
-
 end

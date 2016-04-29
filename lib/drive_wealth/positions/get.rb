@@ -8,7 +8,6 @@ module DriveWealth
       end
 
       def call
-
         blotter = DriveWealth::User::Account.new(token: token, account_number: account_number).call.response
         positions = []
         blotter.raw['equity']['equityPositions'].each do |p|
@@ -24,14 +23,14 @@ module DriveWealth
         end
 
         self.response = DriveWealth::Base::Response.new(raw: blotter.raw,
-                                               status: 200,
-                                               payload: {
-                                                 positions: positions,
-                                                 pages: 1,
-                                                 page: 0,
-                                                 token: token
-                                               },
-                                               messages: ['success'])
+                                                        status: 200,
+                                                        payload: {
+                                                          positions: positions,
+                                                          pages: 1,
+                                                          page: 0,
+                                                          token: token
+                                                        },
+                                                        messages: ['success'])
 
         # pp response.to_h
         DriveWealth.logger.info response.to_h

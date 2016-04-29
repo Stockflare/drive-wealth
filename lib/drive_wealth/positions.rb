@@ -6,7 +6,6 @@ module DriveWealth
     autoload :Get, 'drive_wealth/positions/get'
 
     class << self
-
     end
   end
 end

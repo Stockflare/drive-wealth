@@ -13,16 +13,15 @@ module DriveWealth
       end
 
       def call
-
         details = DriveWealth::User.get_account(token, account_number)
         account = details[:account]
         user_id = details[:user_id]
 
-        uri =  URI.join(DriveWealth.api_uri, "v1/users/#{user_id}/accountSummary/#{account['accountID']}")
+        uri = URI.join(DriveWealth.api_uri, "v1/users/#{user_id}/accountSummary/#{account['accountID']}")
         req = Net::HTTP::Get.new(uri, initheader = {
-          'Content-Type' =>'application/json',
-          'x-mysolomeo-session-key' => token
-          })
+                                   'Content-Type' => 'application/json',
+                                   'x-mysolomeo-session-key' => token
+                                 })
 
         resp = DriveWealth.call_api(uri, req)
 
@@ -47,11 +46,11 @@ module DriveWealth
           total_market_value = 0.0
           total_close_market_value = 0.0
           result['equity']['equityPositions'].each do |position|
-            total_cost_basis = total_cost_basis + position['costBasis'].to_f
-            total_return = total_return + position['unrealizedPL'].to_f
-            total_day_return = total_day_return + position['unrealizedDayPL'].to_f
-            total_market_value = total_market_value + (position['mktPrice'].to_f * position['openQty'].to_f)
-            total_close_market_value = total_close_market_value + (position['priorClose'].to_f * position['openQty'].to_f)
+            total_cost_basis += position['costBasis'].to_f
+            total_return += position['unrealizedPL'].to_f
+            total_day_return += position['unrealizedDayPL'].to_f
+            total_market_value += (position['mktPrice'].to_f * position['openQty'].to_f)
+            total_close_market_value += (position['priorClose'].to_f * position['openQty'].to_f)
           end
 
           payload[:day_return] = total_day_return.round(4)

@@ -80,50 +80,49 @@ describe DriveWealth::Order::Preview do
   end
 
   # describe 'price types' do
-    # let(:order_extras) do
-    #   {
-    #     limit_price: 11.0
-    #   }
-    # end
-    # describe 'limit' do
-    #   let(:price_type) { :limit }
-    #   it 'returns details' do
-    #     expect(subject.status).to eql 200
-    #     expect(subject.payload.type).to eql 'review'
-    #     expect(subject.payload.price_label).to eql '$11.00'
-    #   end
-    # end
-
-    # describe 'stop_market' do
-    #   let(:order_extras) do
-    #     {
-    #       stop_price: 11.0
-    #     }
-    #   end
-    #   let(:price_type) { :stop_market }
-    #   it 'returns details' do
-    #     expect(subject.status).to eql 200
-    #     expect(subject.payload.type).to eql 'review'
-    #     expect(subject.payload.price_label).to eql 'Market (trigger: $11.00)'
-    #   end
-    # end
-
-    # describe 'stop_limit' do
-    #   let(:order_extras) do
-    #     {
-    #       stop_price: 10.0,
-    #       limit_price: 11.0
-    #     }
-    #   end
-    #   let(:price_type) { :stop_limit }
-    #   it 'returns details' do
-    #     expect(subject.status).to eql 200
-    #     expect(subject.payload.type).to eql 'review'
-    #     expect(subject.payload.price_label).to eql '$11.00 (trigger: $10.00)'
-    #   end
-    # end
+  # let(:order_extras) do
+  #   {
+  #     limit_price: 11.0
+  #   }
+  # end
+  # describe 'limit' do
+  #   let(:price_type) { :limit }
+  #   it 'returns details' do
+  #     expect(subject.status).to eql 200
+  #     expect(subject.payload.type).to eql 'review'
+  #     expect(subject.payload.price_label).to eql '$11.00'
+  #   end
   # end
 
+  # describe 'stop_market' do
+  #   let(:order_extras) do
+  #     {
+  #       stop_price: 11.0
+  #     }
+  #   end
+  #   let(:price_type) { :stop_market }
+  #   it 'returns details' do
+  #     expect(subject.status).to eql 200
+  #     expect(subject.payload.type).to eql 'review'
+  #     expect(subject.payload.price_label).to eql 'Market (trigger: $11.00)'
+  #   end
+  # end
+
+  # describe 'stop_limit' do
+  #   let(:order_extras) do
+  #     {
+  #       stop_price: 10.0,
+  #       limit_price: 11.0
+  #     }
+  #   end
+  #   let(:price_type) { :stop_limit }
+  #   it 'returns details' do
+  #     expect(subject.status).to eql 200
+  #     expect(subject.payload.type).to eql 'review'
+  #     expect(subject.payload.price_label).to eql '$11.00 (trigger: $10.00)'
+  #   end
+  # end
+  # end
 
   # describe 'order that fails' do
   #   # Quantity above 100 will trigger errors with the test user

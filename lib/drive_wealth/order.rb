@@ -9,7 +9,6 @@ module DriveWealth
     autoload :Cancel, 'drive_wealth/order/cancel'
 
     class << self
-
     end
   end
 end

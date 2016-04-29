@@ -14,19 +14,17 @@ module DriveWealth
       end
 
       def call
-
         details = DriveWealth::User.get_account(token, account_number)
         account = details[:account]
         user_id = details[:user_id]
 
-
         # Get the User details so we can get the Commission amount
-        uri =  URI.join(DriveWealth.api_uri, "v1/users/#{user_id}")
+        uri = URI.join(DriveWealth.api_uri, "v1/users/#{user_id}")
         req = Net::HTTP::Get.new(uri, initheader = {
-          'Content-Type' => 'application/json',
-          'x-mysolomeo-session-key' => token,
-          'Accept' => 'application/json'
-          })
+                                   'Content-Type' => 'application/json',
+                                   'x-mysolomeo-session-key' => token,
+                                   'Accept' => 'application/json'
+                                 })
         resp = DriveWealth.call_api(uri, req)
         result = JSON.parse(resp.body)
 
@@ -34,12 +32,12 @@ module DriveWealth
           commission_rate = result['commissionRate'].to_f
 
           # Lookup the Stock in order to get ID and prices
-          uri =  URI.join(DriveWealth.api_uri, "v1/instruments?symbol=#{ticker}")
+          uri = URI.join(DriveWealth.api_uri, "v1/instruments?symbol=#{ticker}")
           req = Net::HTTP::Get.new(uri, initheader = {
-            'Content-Type' =>'application/json',
-            'x-mysolomeo-session-key' => token,
-            'Accept' => 'application/json'
-            })
+                                     'Content-Type' => 'application/json',
+                                     'x-mysolomeo-session-key' => token,
+                                     'Accept' => 'application/json'
+                                   })
 
           resp = DriveWealth.call_api(uri, req)
 
@@ -53,17 +51,15 @@ module DriveWealth
               estimated_value = quantity * instrument['rateBid'].to_f
             end
 
-
-
             payload = {
               type: 'review',
               ticker: instrument['symbol'].downcase,
               order_action: order_action,
               quantity: quantity,
               expiration: expiration,
-              price_label: "",
-              value_label: "",
-              message: "",
+              price_label: '',
+              value_label: '',
+              message: '',
               last_price: instrument['lastTrade'].to_f,
               bid_price: instrument['rateBid'].to_f,
               ask_price: instrument['rateAsk'].to_f,
@@ -76,12 +72,10 @@ module DriveWealth
               must_acknowledge: [],
               token: token
             }
-            raw = self.attributes.reject{|k,v| k == :response}.merge({
-              instrument: instrument,
-              account: account,
-              user_id: user_id,
-              commission: commission_rate
-              })
+            raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
+                                                                     account: account,
+                                                                     user_id: user_id,
+                                                                     commission: commission_rate)
             self.response = DriveWealth::Base::Response.new(
               raw: raw,
               payload: payload,
@@ -90,7 +84,7 @@ module DriveWealth
             )
 
             # Cache the Order details for the Order Execute Call
-            DriveWealth.cache.set(token, self.response.to_h.to_json, 60)
+            DriveWealth.cache.set(token, response.to_h.to_json, 60)
 
           else
             raise Trading::Errors::OrderException.new(

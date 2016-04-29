@@ -7,12 +7,12 @@ module DriveWealth
       end
 
       def call
-        uri =  URI.join(DriveWealth.api_uri, "v1/userSessions/#{user_token}")
+        uri = URI.join(DriveWealth.api_uri, "v1/userSessions/#{user_token}")
 
         req = Net::HTTP::Get.new(uri, initheader = {
-          'Content-Type' =>'application/json',
-          'x-mysolomeo-session-key' => user_token
-          })
+                                   'Content-Type' => 'application/json',
+                                   'x-mysolomeo-session-key' => user_token
+                                 })
 
         resp = DriveWealth.call_api(uri, req)
 

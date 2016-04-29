@@ -30,13 +30,13 @@ module DriveWealth
             end
           end
           response = DriveWealth::Base::Response.new(raw: result,
-                                                 status: 200,
-                                                 payload: {
-                                                   type: 'success',
-                                                   token: result['sessionKey'],
-                                                   accounts: accounts
-                                                 },
-                                                 messages: ['success'])
+                                                     status: 200,
+                                                     payload: {
+                                                       type: 'success',
+                                                       token: result['sessionKey'],
+                                                       accounts: accounts
+                                                     },
+                                                     messages: ['success'])
 
         else
           #
@@ -104,8 +104,7 @@ module DriveWealth
             messages: ['Account could not be found']
           )
         end
-
-      end      
+      end
     end
   end
 end

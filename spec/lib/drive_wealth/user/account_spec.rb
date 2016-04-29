@@ -28,7 +28,7 @@ describe DriveWealth::User::Account do
       expect(subject.payload.power).not_to eql 0.0
       expect(subject.payload.day_return).not_to eql 0.0
       expect(subject.payload.day_return_percent).not_to eql 0.0
-      expect(subject.payload.total_return).not_to eql  0.0
+      expect(subject.payload.total_return).not_to eql 0.0
       expect(subject.payload.total_return_percent).not_to eql 0.0
       expect(subject.payload.value).not_to eql 0.0
     end

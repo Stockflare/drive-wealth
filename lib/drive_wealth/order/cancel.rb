@@ -8,21 +8,20 @@ module DriveWealth
       end
 
       def call
-
         blotter = DriveWealth::User::Account.new(token: token, account_number: account_number).call.response
-        orders = blotter.raw['orders'].select{|o| o['orderNo'] == order_number}
+        orders = blotter.raw['orders'].select { |o| o['orderNo'] == order_number }
         if orders.count > 0
           order = orders[0]
 
           order_payload = DriveWealth::Order::Status.new(token: token, account_number: account_number, order_number: order_number).call.response.payload
           order_payload['orders'][0][:status] = :cancelled
 
-          uri =  URI.join(DriveWealth.api_uri, "v1/orders/#{order['orderID']}")
+          uri = URI.join(DriveWealth.api_uri, "v1/orders/#{order['orderID']}")
 
           req = Net::HTTP::Delete.new(uri, initheader = {
-            'Content-Type' =>'application/json',
-            'x-mysolomeo-session-key' => token
-            })
+                                        'Content-Type' => 'application/json',
+                                        'x-mysolomeo-session-key' => token
+                                      })
 
           resp = DriveWealth.call_api(uri, req)
 

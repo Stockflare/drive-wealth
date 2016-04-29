@@ -6,12 +6,12 @@ module DriveWealth
       end
 
       def call
-        uri =  URI.join(DriveWealth.api_uri, "v1/userSessions/#{token}")
+        uri = URI.join(DriveWealth.api_uri, "v1/userSessions/#{token}")
 
         req = Net::HTTP::Delete.new(uri, initheader = {
-          'Content-Type' =>'application/json',
-          'x-mysolomeo-session-key' => token
-          })
+                                      'Content-Type' => 'application/json',
+                                      'x-mysolomeo-session-key' => token
+                                    })
 
         resp = DriveWealth.call_api(uri, req)
 
@@ -19,13 +19,13 @@ module DriveWealth
 
         if resp.code == '200'
           self.response = DriveWealth::Base::Response.new(raw: result,
-                                                      status: 200,
-                                                      payload: {
-                                                        type: 'success',
-                                                        accounts: [],
-                                                        token: token
-                                                      },
-                                                      messages: ['success'])
+                                                          status: 200,
+                                                          payload: {
+                                                            type: 'success',
+                                                            accounts: [],
+                                                            token: token
+                                                          },
+                                                          messages: ['success'])
         else
           raise Trading::Errors::LoginException.new(
             type: :error,

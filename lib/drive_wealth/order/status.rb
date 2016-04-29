@@ -8,10 +8,9 @@ module DriveWealth
       end
 
       def call
-
         blotter = DriveWealth::User::Account.new(token: token, account_number: account_number).call.response
         orders = blotter.raw['orders']
-        orders = blotter.raw['orders'].select{|o| o['orderNo'] == order_number} if order_number
+        orders = blotter.raw['orders'].select { |o| o['orderNo'] == order_number } if order_number
         if orders.count > 0
           payload_orders = orders.map do |order|
             filled_value = blotter.raw['transactions'].inject(0.0) do |sum, transaction|
@@ -21,7 +20,7 @@ module DriveWealth
             end
             filled_quantity = blotter.raw['transactions'].inject(0.0) do |sum, transaction|
               if transaction['orderNo'] == order['orderNo']
-                sum + (transaction['cumQty'].to_f )
+                sum + transaction['cumQty'].to_f
               end
             end
             filled_price = filled_price && filled_quantity && filled_quantity != 0 ? filled_value / filled_quantity : 0.0
