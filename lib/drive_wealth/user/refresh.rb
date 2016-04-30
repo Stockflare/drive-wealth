@@ -14,7 +14,7 @@ module DriveWealth
                                  })
 
         resp = DriveWealth.call_api(uri, req)
-        result = JSON.parse(resp.body)
+        # result = JSON.parse(resp.body)
 
         if resp.code == '200'
           self.response = DriveWealth::User::Login.new(
@@ -25,8 +25,8 @@ module DriveWealth
           raise Trading::Errors::LoginException.new(
             type: :error,
             code: resp.code,
-            description: result['message'],
-            messages: result['message']
+            description: 'Cannot Heartbeat Session',
+            messages: 'Cannot Heartbeat Session'
           )
         end
 
