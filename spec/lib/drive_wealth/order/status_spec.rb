@@ -23,7 +23,6 @@ describe DriveWealth::Order::Status do
     end
     it 'returns details' do
       expect(subject.status).to eql 200
-      binding.pry
       expect(subject.payload.type).to eql 'success'
       expect(subject.payload.token).not_to be_empty
       expect(subject.payload.orders[0].ticker).not_to be_empty

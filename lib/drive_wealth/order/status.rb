@@ -15,13 +15,15 @@ module DriveWealth
           payload_orders = orders.map do |order|
             filled_value = blotter.raw['transactions'].inject(0.0) do |sum, transaction|
               if transaction['orderNo'] == order['orderNo']
-                sum + (transaction['cumQty'].to_f * transaction['executedPrice'].to_f)
+                sum = sum + (transaction['cumQty'].to_f * transaction['executedPrice'].to_f)
               end
+              sum
             end
             filled_quantity = blotter.raw['transactions'].inject(0.0) do |sum, transaction|
               if transaction['orderNo'] == order['orderNo']
-                sum + transaction['cumQty'].to_f
+                sum = sum + transaction['cumQty'].to_f
               end
+              sum
             end
             filled_price = filled_price && filled_quantity && filled_quantity != 0 ? filled_value / filled_quantity : 0.0
 
