@@ -84,7 +84,7 @@ module DriveWealth
             )
 
             # Cache the Order details for the Order Execute Call
-            DriveWealth.cache.set(token, response.to_h.to_json, 60)
+            DriveWealth.cache.set("#{DriveWealth::CACHE_PREFIX}_#{token}", response.to_h.to_json, 60)
 
           else
             raise Trading::Errors::OrderException.new(

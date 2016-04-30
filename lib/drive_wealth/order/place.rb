@@ -10,7 +10,7 @@ module DriveWealth
         # Get the Order Details from the cache
 
         begin
-          preview = JSON.parse(DriveWealth.cache.get(token))
+          preview = JSON.parse(DriveWealth.cache.get("#{DriveWealth::CACHE_PREFIX}_#{token}"))
           body = {
             accountID: preview['raw']['account']['accountID'],
             accountNo: preview['raw']['account']['accountNo'],

@@ -12,7 +12,10 @@ module DriveWealth
   autoload :Positions, 'drive_wealth/positions'
   autoload :Order, 'drive_wealth/order'
 
+  CACHE_PREFIX = 'drive_wealth_preview'
+  
   class << self
+
     attr_writer :logger, :api_uri, :referral_code, :language, :cache
 
     # Helper to configure .
