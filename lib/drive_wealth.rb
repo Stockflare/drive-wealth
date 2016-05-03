@@ -13,7 +13,7 @@ module DriveWealth
   autoload :Order, 'drive_wealth/order'
 
   CACHE_PREFIX = 'drive_wealth_preview'
-  
+
   class << self
 
     attr_writer :logger, :api_uri, :referral_code, :language, :cache
@@ -31,7 +31,7 @@ module DriveWealth
         '0' => :pending,
         'OPEN' => :open,
         '2' => :filled,
-        '1' => :part_filled,
+        '1' => :filling,
         '4' => :cancelled,
         '8' => :rejected,
         'NOT_FOUND' => :not_found,
