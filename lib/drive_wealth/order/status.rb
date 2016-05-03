@@ -30,8 +30,9 @@ module DriveWealth
             {
               ticker: order['symbol'].downcase,
               order_action: DriveWealth.order_status_actions[order['side']],
-              filled_quantity: filled_quantity,
-              filled_price: filled_price,
+              filled_quantity: filled_quantity.to_f,
+              filled_price: filled_price.to_f,
+              filled_total: filled_value.to_f,
               order_number: order['orderNo'],
               quantity: order['orderQty'].to_f,
               expiration: :day,
