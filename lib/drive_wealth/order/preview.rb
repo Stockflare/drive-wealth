@@ -48,8 +48,8 @@ module DriveWealth
               raise Trading::Errors::OrderException.new(
                 type: :error,
                 code: 403,
-                description: 'unsupported_instrument',
-                messages: 'unsupported_instrument'
+                description: 'Broker does not trade this instrument',
+                messages: 'Broker does not trade this instrument'
               )
             else
               instrument = result[0]
