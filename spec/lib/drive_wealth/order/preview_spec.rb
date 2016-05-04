@@ -17,13 +17,14 @@ describe DriveWealth::Order::Preview do
   let(:price_type) { :market }
   let(:order_expiration) { :day }
   let(:quantity) { 10 }
+  let(:ticker) { 'aapl' }
   let(:base_order) do
     {
       token: token,
       account_number: account_number,
       order_action: order_action,
       quantity: quantity,
-      ticker: 'aapl',
+      ticker: ticker,
       price_type: price_type,
       expiration: order_expiration
     }
@@ -76,6 +77,14 @@ describe DriveWealth::Order::Preview do
     let(:order_action) { :sell_short }
     it 'returns details' do
       expect(subject.payload.order_action).to eql :sell_short
+    end
+  end
+
+  describe 'for a stock that is not supported' do
+    let(:ticker) { 'srne' }
+
+    it 'throws error' do
+      expect { subject }.to raise_error(Trading::Errors::OrderException)
     end
   end
 

@@ -44,47 +44,57 @@ module DriveWealth
           result = JSON.parse(resp.body)
 
           if resp.code == '200'
-            instrument = result[0]
-            if order_action == :buy
-              estimated_value = quantity * instrument['rateAsk'].to_f
+            if result.empty?
+              raise Trading::Errors::OrderException.new(
+                type: :error,
+                code: 403,
+                description: 'unsupported_instrument',
+                messages: 'unsupported_instrument'
+              )
             else
-              estimated_value = quantity * instrument['rateBid'].to_f
+              instrument = result[0]
+
+              if order_action == :buy
+                estimated_value = quantity * instrument['rateAsk'].to_f
+              else
+                estimated_value = quantity * instrument['rateBid'].to_f
+              end
+
+              payload = {
+                type: 'review',
+                ticker: instrument['symbol'].downcase,
+                order_action: order_action,
+                quantity: quantity,
+                expiration: expiration,
+                price_label: '',
+                value_label: '',
+                message: '',
+                last_price: instrument['lastTrade'].to_f,
+                bid_price: instrument['rateBid'].to_f,
+                ask_price: instrument['rateAsk'].to_f,
+                timestamp: Time.now.utc.to_i,
+                buying_power: account['rtCashAvailForTrading'].to_f,
+                estimated_commission: commission_rate,
+                estimated_value: estimated_value,
+                estimated_total: estimated_value + commission_rate,
+                warnings: [],
+                must_acknowledge: [],
+                token: token
+              }
+              raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
+                                                                       account: account,
+                                                                       user_id: user_id,
+                                                                       commission: commission_rate)
+              self.response = DriveWealth::Base::Response.new(
+                raw: raw,
+                payload: payload,
+                messages: Array('success'),
+                status: 200
+              )
+
+              # Cache the Order details for the Order Execute Call
+              DriveWealth.cache.set("#{DriveWealth::CACHE_PREFIX}_#{token}", response.to_h.to_json, 60)
             end
-
-            payload = {
-              type: 'review',
-              ticker: instrument['symbol'].downcase,
-              order_action: order_action,
-              quantity: quantity,
-              expiration: expiration,
-              price_label: '',
-              value_label: '',
-              message: '',
-              last_price: instrument['lastTrade'].to_f,
-              bid_price: instrument['rateBid'].to_f,
-              ask_price: instrument['rateAsk'].to_f,
-              timestamp: Time.now.utc.to_i,
-              buying_power: account['rtCashAvailForTrading'].to_f,
-              estimated_commission: commission_rate,
-              estimated_value: estimated_value,
-              estimated_total: estimated_value + commission_rate,
-              warnings: [],
-              must_acknowledge: [],
-              token: token
-            }
-            raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
-                                                                     account: account,
-                                                                     user_id: user_id,
-                                                                     commission: commission_rate)
-            self.response = DriveWealth::Base::Response.new(
-              raw: raw,
-              payload: payload,
-              messages: Array('success'),
-              status: 200
-            )
-
-            # Cache the Order details for the Order Execute Call
-            DriveWealth.cache.set("#{DriveWealth::CACHE_PREFIX}_#{token}", response.to_h.to_json, 60)
 
           else
             raise Trading::Errors::OrderException.new(
