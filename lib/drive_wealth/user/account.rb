@@ -55,9 +55,12 @@ module DriveWealth
 
           payload[:day_return] = total_day_return.round(4)
           payload[:total_return] = total_return.round(4)
-          payload[:total_return_percent] = (total_return / total_cost_basis).round(4)
-          payload[:day_return_percent] = (total_day_return / (total_market_value - total_day_return)).round(4)
-
+          if total_cost_basis > 0
+            payload[:total_return_percent] = (total_return / total_cost_basis).round(4)
+          end
+          if (total_market_value - total_day_return) != 0
+            payload[:day_return_percent] = (total_day_return / (total_market_value - total_day_return)).round(4)
+          end
           self.response = DriveWealth::Base::Response.new(
             raw: result,
             payload: payload,
