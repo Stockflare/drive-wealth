@@ -56,7 +56,7 @@ module DriveWealth
     class Position
       include Virtus.value_object(coerce: true)
       values do
-        attribute :quantity, Integer
+        attribute :quantity, Float
         attribute :cost_basis, Float
         attribute :ticker, String
         attribute :instrument_class, String
