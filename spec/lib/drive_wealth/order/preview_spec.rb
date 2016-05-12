@@ -46,7 +46,7 @@ describe DriveWealth::Order::Preview do
       expect(subject.payload.token).not_to be_empty
       expect(subject.payload.ticker).to eql 'aapl'
       expect(subject.payload.order_action).to eql :buy
-      expect(subject.payload.quantity).to eql 10
+      expect(subject.payload.quantity).to eql 10.0
       expect(subject.payload.expiration).to eql :day
       # expect(subject.payload.price_label).to eql 'Market'
       # expect(subject.payload.value_label).to eql subject.raw['orderDetails']['orderValueLabel']

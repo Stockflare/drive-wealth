@@ -5,7 +5,7 @@ module DriveWealth
         attribute :token, String
         attribute :account_number, String
         attribute :order_action, Symbol
-        attribute :quantity, Integer
+        attribute :quantity, Float
         attribute :ticker, String
         attribute :price_type, Symbol
         attribute :expiration, Symbol
