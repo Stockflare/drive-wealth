@@ -11,6 +11,7 @@ module DriveWealth
   autoload :User, 'drive_wealth/user'
   autoload :Positions, 'drive_wealth/positions'
   autoload :Order, 'drive_wealth/order'
+  autoload :Instrument, 'drive_wealth/instrument'
 
   CACHE_PREFIX = 'drive_wealth_preview'
 

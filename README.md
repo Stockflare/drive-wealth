@@ -744,4 +744,82 @@ Example response
       "status"=>:pending_cancel}],
    "token"=>"d9c45bb6223f425c865ed7c88042ad1f"},
  :messages=>["Order statuses successfully fetched"]}
+
+
+
+```
+
+
+### DriveWealth::Instrument::Details
+
+Example Call
+
+```
+DriveWealth::Order::Cancel.new(
+  token: preview_token,
+  ticker: "aapl"
+).call.response
+```
+
+Example response
+
+```
+{:raw=>
+  {{"instrumentID"=>"a67422af-8504-43df-9e63-7361eb0bd99e",
+    "name"=>"Apple, Inc.",
+    "category"=>"Stock",
+    "currencyID"=>"USD",
+    "description"=>"Apple Inc. designs, manufactures, and markets mobile communication and media devices, personal computers, and portable digital music players worldwide.",
+    "exchangeID"=>"XNAS",
+    "limitStatus"=>0,
+    "instrumentTypeID"=>6,
+    "isLongOnly"=>true,
+    "marginCurrencyID"=>"USD",
+    "orderSizeMax"=>10000,
+    "orderSizeMin"=>0.0001,
+    "orderSizeStep"=>0.0001,
+    "rateAsk"=>97.45,
+    "rateBid"=>97.44,
+    "rateHigh"=>99.12,
+    "rateLow"=>97.1,
+    "rateOpen"=>98.69,
+    "ratePrecision"=>2,
+    "symbol"=>"AAPL",
+    "tags"=>["aapl", "sp500", "usa"],
+    "tradeStatus"=>1,
+    "tradingHours"=>"Mon-Fri: 9:30am - 4:00pm ET",
+    "uom"=>"shares",
+    "urlImage"=>"http://syscdn.drivewealth.net/images/symbols/aapl.png",
+    "urlInvestor"=>"http://investor.apple.com/",
+    "chaikinPgr"=>
+     "{  \"Corrected PGR Value\":\"2\",  \"Financial Metrics\":\"2\",  \"Earnings Performance\":\"4\",  \"Price/Volume Activity\":\"3\",  \"Expert Opinions\":\"1\",  \"pgrSummaryText\":\"The Chaikin Power Gauge Rating for AAPL is Bearish due to very negative expert activity and poor financial metrics. The stock also has strong earnings performance.\"}",
+    "sector"=>"Technology",
+    "priorClose"=>97.34,
+    "close"=>0,
+    "lastTrade"=>97.34,
+    "nameLower"=>"apple, inc.",
+    "underlyingID"=>"0",
+    "marketState"=>2,
+    "minTic"=>0,
+    "pipMultiplier"=>1,
+    "tickerSymbol"=>"AAPL",
+    "rebateSpread"=>0,
+    "longOnly"=>true}=>nil},
+ :status=>200,
+ :payload=>
+  {"type"=>"success",
+   "broker_id"=>"a67422af-8504-43df-9e63-7361eb0bd99e",
+   "ticker"=>"aapl",
+   "last_price"=>97.34,
+   "bid_price"=>97.44,
+   "ask_price"=>97.45,
+   "order_size_max"=>10000.0,
+   "order_size_min"=>0.0001,
+   "order_size_step"=>0.0001,
+   "allow_fractional_shares"=>true,
+   "timestamp"=>1465915138,
+   "warnings"=>[],
+   "must_acknowledge"=>[],
+   "token"=>"628f9e2b-6acb-4d6f-9fff-63c93d23d9d0.2016-06-14T14:38:53.603Z"},
+ :messages=>["success"]}
 ```

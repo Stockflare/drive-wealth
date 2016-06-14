@@ -5,7 +5,7 @@ require 'drive_wealth'
 require 'faker'
 require 'factory_girl'
 require 'pry'
-require 'pry-byebug'
+# require 'pry-byebug'
 require 'memcached'
 
 Dir[Pathname(__FILE__).dirname.join('shared/*.rb').to_s].each { |f| require f }
