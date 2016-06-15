@@ -25,6 +25,7 @@ module DriveWealth
 
           body[:price] = price if preview['raw']['price_type'].to_sym == :stop_market
           body[:limitPrice] = price if preview['raw']['price_type'].to_sym == :limit
+          body[:amountCash] = preview['raw']['amount'].to_f if preview['raw']['price_type'].to_sym == :market && preview['raw']['amount'] && preview['raw']['amount'] != 0.0
 
           uri = URI.join(DriveWealth.api_uri, 'v1/orders')
           req = Net::HTTP::Post.new(uri, initheader = {

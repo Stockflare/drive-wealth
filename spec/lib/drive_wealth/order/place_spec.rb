@@ -76,6 +76,54 @@ describe DriveWealth::Order::Place do
       expect(subject.payload.order_action).to eql :sell
     end
   end
+
+  describe 'Buy Order with Amount' do
+    let(:order_extras) do
+      {
+        amount: 500.0
+      }
+    end
+    it 'returns details' do
+      expect(subject.status).to eql 200
+      expect(subject.payload.type).to eql 'success'
+      expect(subject.payload.token).not_to be_empty
+      expect(subject.payload.ticker).to eql 'aapl'
+      expect(subject.payload.order_action).to eql :buy
+      expect(subject.payload.quantity).to eql 10.0
+      expect(subject.payload.expiration).to eql :day
+      expect(subject.payload.price_label).to eql 'Market'
+      # expect(subject.payload.message).to eql subject.raw['confirmationMessage']
+      expect(subject.payload.last_price).to be > 0
+      expect(subject.payload.bid_price).to be > 0
+      expect(subject.payload.ask_price).to be > 0
+      expect(subject.payload.price_timestamp).to be > 0
+      expect(subject.payload.timestamp).to be > 0
+      expect(subject.payload.order_number).not_to be_empty
+      expect(subject.payload.price).to eql price
+    end
+  end
+
+  describe 'fractional shares' do
+    let(:quantity) { 10.5 }
+    it 'returns details' do
+      expect(subject.status).to eql 200
+      expect(subject.payload.type).to eql 'success'
+      expect(subject.payload.token).not_to be_empty
+      expect(subject.payload.ticker).to eql 'aapl'
+      expect(subject.payload.order_action).to eql :buy
+      expect(subject.payload.quantity).to eql 10.5
+      expect(subject.payload.expiration).to eql :day
+      expect(subject.payload.price_label).to eql 'Market'
+      # expect(subject.payload.message).to eql subject.raw['confirmationMessage']
+      expect(subject.payload.last_price).to be > 0
+      expect(subject.payload.bid_price).to be > 0
+      expect(subject.payload.ask_price).to be > 0
+      expect(subject.payload.price_timestamp).to be > 0
+      expect(subject.payload.timestamp).to be > 0
+      expect(subject.payload.order_number).not_to be_empty
+      expect(subject.payload.price).to eql price
+    end
+  end
   # describe 'Buy to Cover Order' do
   #   let(:order_action) { :buy_to_cover }
   #   it 'returns details' do

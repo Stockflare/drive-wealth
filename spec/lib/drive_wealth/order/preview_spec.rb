@@ -79,10 +79,33 @@ describe DriveWealth::Order::Preview do
       expect(subject.payload.order_action).to eql :sell_short
     end
   end
+  
+  describe 'Market Buy with Amount' do
+    let(:order_extras) do
+      {
+        amount: 10.0
+      }
+    end
+    it 'returns details' do
+      expect(subject.payload.amount).to eql 10.0
+    end
+  end
 
   describe 'for a stock that is not supported' do
     let(:ticker) { 'srne' }
 
+    it 'throws error' do
+      expect { subject }.to raise_error(Trading::Errors::OrderException)
+    end
+  end
+
+  describe 'Amount and not Market' do
+    let(:order_extras) do
+      {
+        amount: 10
+      }
+    end
+    let(:price_type) { :limit }
     it 'throws error' do
       expect { subject }.to raise_error(Trading::Errors::OrderException)
     end

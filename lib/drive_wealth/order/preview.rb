@@ -11,9 +11,20 @@ module DriveWealth
         attribute :expiration, Symbol
         attribute :limit_price, Float
         attribute :stop_price, Float
+        attribute :amount, Float
       end
 
       def call
+        # Reject any order that has an amount and is not Market
+        if amount && amount != 0.0 && price_type != :market
+          raise Trading::Errors::OrderException.new(
+            type: :error,
+            code: 500,
+            description: 'Amount only suppoorted for market orders',
+            messages: 'Amount only suppoorted for market orders'
+          )
+        end
+
         details = DriveWealth::User.get_account(token, account_number)
         account = details[:account]
         user_id = details[:user_id]
@@ -79,12 +90,14 @@ module DriveWealth
                 estimated_total: estimated_value + commission_rate,
                 warnings: [],
                 must_acknowledge: [],
+                amount: amount,
                 token: token
               }
               raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
                                                                        account: account,
                                                                        user_id: user_id,
-                                                                       commission: commission_rate)
+                                                                       commission: commission_rate,
+                                                                       amount: amount)
               self.response = DriveWealth::Base::Response.new(
                 raw: raw,
                 payload: payload,
