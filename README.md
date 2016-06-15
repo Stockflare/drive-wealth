@@ -452,7 +452,8 @@ DriveWealth::Order::Preview.new(
   quantity: 10,
   ticker: 'aapl',
   price_type: :market,
-  expiration: :day
+  expiration: :day,
+  amount: 500,
 ).call.response
 ```
 
@@ -502,6 +503,7 @@ Successful response:
                'estimated_total' => 28.5,
                'warnings' => [],
                'must_acknowledge' => [],
+               'amount' => 500,
                'token' => '140784ef96214a5186041abebdfe038a' },
   messages: [] }
 
