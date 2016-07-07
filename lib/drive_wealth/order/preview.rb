@@ -42,6 +42,11 @@ module DriveWealth
         if resp.code == '200'
           commission_rate = result['commissionRate'].to_f
 
+          # Hack for Drivewealth fractional shares
+          if quantity < 1.0
+            commission_rate = 0.99
+          end
+
           # Lookup the Stock in order to get ID and prices
           uri = URI.join(DriveWealth.api_uri, "v1/instruments?symbol=#{ticker}")
           req = Net::HTTP::Get.new(uri, initheader = {
