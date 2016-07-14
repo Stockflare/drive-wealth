@@ -18,6 +18,7 @@ describe DriveWealth::Order::Preview do
   let(:order_expiration) { :day }
   let(:quantity) { 10 }
   let(:ticker) { 'aapl' }
+  let(:buying_power) { 10000 }
   let(:base_order) do
     {
       token: token,
@@ -31,6 +32,10 @@ describe DriveWealth::Order::Preview do
   end
   let(:order_extras) do
     {}
+  end
+
+  before do
+    allow(DriveWealth::Order::Preview).to receive(:buying_power).and_return(buying_power)
   end
 
   subject do
@@ -67,6 +72,14 @@ describe DriveWealth::Order::Preview do
       expect(subject.payload.order_action).to eql :sell
     end
   end
+
+  describe 'Not enough buying power' do
+    let(:quantity) { 10000 }
+    it 'raises error' do
+      expect { subject }.to raise_error(Trading::Errors::OrderException)
+    end
+  end
+
   describe 'Buy to Cover Order' do
     let(:order_action) { :buy_to_cover }
     it 'returns details' do
@@ -79,7 +92,7 @@ describe DriveWealth::Order::Preview do
       expect(subject.payload.order_action).to eql :sell_short
     end
   end
-  
+
   describe 'Market Buy with Amount' do
     let(:order_extras) do
       {
