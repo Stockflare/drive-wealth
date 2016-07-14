@@ -25,7 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'yajl-ruby', ['~> 1.2']
   spec.add_runtime_dependency 'httparty'
   spec.add_runtime_dependency 'hashie'
-  spec.add_runtime_dependency 'memcached'
 
   spec.add_development_dependency 'bundler', ['~> 1.6']
   spec.add_development_dependency 'rake', ['~> 10.3']
@@ -37,4 +36,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'coveralls', ['~> 0.8']
   spec.add_development_dependency 'factory_girl', ['~> 4.5']
   spec.add_development_dependency 'pry-byebug'
+  spec.add_development_dependency 'memcached'
 end
