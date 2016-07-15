@@ -9,36 +9,31 @@ module DriveWealth
 
       def call
         blotter = DriveWealth::User::Account.new(token: token, account_number: account_number).call.response
-        orders = blotter.raw['orders']
-        orders = blotter.raw['orders'].select { |o| o['orderNo'] == order_number } if order_number
-        if orders.count > 0
-          payload_orders = orders.map do |order|
-            filled_value = blotter.raw['transactions'].inject(0.0) do |sum, transaction|
-              if transaction['orderNo'] == order['orderNo']
-                sum = sum + (transaction['cumQty'].to_f * transaction['executedPrice'].to_f)
-              end
-              sum
-            end
-            filled_quantity = blotter.raw['transactions'].inject(0.0) do |sum, transaction|
-              if transaction['orderNo'] == order['orderNo']
-                sum = sum + transaction['cumQty'].to_f
-              end
-              sum
-            end
-            filled_price = filled_price && filled_quantity && filled_quantity != 0 ? filled_value / filled_quantity : 0.0
+        transactions = blotter.raw['transactions']
+        orders = {}
+        transactions.each do |transaction|
+          filled_quantity = transaction.has_key?('cumQty') ? transaction['cumQty'].to_f : 0.0
+          filled_value = transaction.has_key?('cumQty') && transaction.has_key?('executedPrice') ? transaction['cumQty'].to_f * transaction['executedPrice'].to_f : 0.0
+          filled_price = filled_quantity > 0 ? filled_value / filled_quantity : 0.0
+          order = {
+            ticker: transaction['symbol'].downcase,
+            order_action: DriveWealth.order_status_actions[transaction['side']],
+            filled_quantity: filled_quantity.to_f,
+            filled_price: filled_price.to_f,
+            filled_total: filled_value.to_f,
+            order_number: transaction['orderNo'],
+            quantity: transaction['orderQty'].to_f,
+            expiration: :day,
+            status: DriveWealth.order_statuses[transaction['orderStatus']]
+          }
+          orders[transaction['orderNo']] = order
+        end
 
-            {
-              ticker: order['symbol'].downcase,
-              order_action: DriveWealth.order_status_actions[order['side']],
-              filled_quantity: filled_quantity.to_f,
-              filled_price: filled_price.to_f,
-              filled_total: filled_value.to_f,
-              order_number: order['orderNo'],
-              quantity: order['orderQty'].to_f,
-              expiration: :day,
-              status: DriveWealth.order_statuses[order['orderStatus']]
-            }
-          end
+        payload_orders = orders.keys.map do |key|
+          orders[key] if (order_number && key == order_number) || ! order_number
+        end.compact
+
+        if payload_orders.count > 0
 
           payload = {
             type: 'success',

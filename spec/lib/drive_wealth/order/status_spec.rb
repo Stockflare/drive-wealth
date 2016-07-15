@@ -13,6 +13,47 @@ describe DriveWealth::Order::Status do
   end
   let(:token) { user.token }
   let(:account_number) { user.accounts[0].account_number }
+  let(:order_action) { :buy }
+  let(:price_type) { :market }
+  let(:order_expiration) { :day }
+  let(:quantity) { 10.0 }
+  let(:base_order) do
+    {
+      token: token,
+      account_number: account_number,
+      order_action: order_action,
+      quantity: quantity,
+      ticker: 'aapl',
+      price_type: price_type,
+      expiration: order_expiration
+    }
+  end
+  let(:order_extras) do
+    {}
+  end
+
+  let(:price) { 123.45 }
+
+  let!(:preview) do
+    DriveWealth::Order::Preview.new(
+      base_order.merge(order_extras)
+    ).call.response.payload
+  end
+
+  let(:preview_token) { preview.token }
+
+  let(:placed_order) do
+    DriveWealth::Order::Place.new(
+      token: preview_token,
+      price: price
+    ).call.response
+  end
+
+  let(:buying_power) { 100000 }
+
+  before do
+    allow(DriveWealth::Order::Preview).to receive(:buying_power).and_return(buying_power)
+  end
 
   describe 'All Order Status' do
     subject do
@@ -22,23 +63,17 @@ describe DriveWealth::Order::Status do
       ).call.response
     end
     it 'returns details' do
+      expect(placed_order.status).to eql 200
       expect(subject.status).to eql 200
       expect(subject.payload.type).to eql 'success'
       expect(subject.payload.token).not_to be_empty
       expect(subject.payload.orders[0].ticker).not_to be_empty
       expect(subject.payload.orders[0].order_action).to eql :buy
-      # expect(subject.payload.orders[0].filled_quantity).to eql 0
-      # expect(subject.payload.orders[0].filled_price).to eql 0.0
-      # expect(subject.payload.orders[0].quantity).to eql 5000
-      # expect(subject.payload.orders[0].expiration).to eql :day
-      # expect(subject.payload.orders[0].status).to eql :open
-      # expect(subject.payload.orders[1].ticker).to eql 'mcd'
-      # expect(subject.payload.orders[1].order_action).to eql :sell_short
-      # expect(subject.payload.orders[1].filled_quantity).to eql 6000
-      # expect(subject.payload.orders[1].filled_price).to eql 123.45
-      # expect(subject.payload.orders[1].quantity).to eql 10_000
-      # expect(subject.payload.orders[1].expiration).to eql :gtc
-      # expect(subject.payload.orders[1].status).to eql :part_filled
+      expect(subject.payload.orders[0].filled_quantity).to eql quantity
+      expect(subject.payload.orders[0].filled_price).to be > 0
+      expect(subject.payload.orders[0].quantity).to quantity
+      expect(subject.payload.orders[0].expiration).to eql :day
+      expect(subject.payload.orders[0].status).to eql :filled
     end
     describe 'bad token' do
       let(:token) { 'foooooobaaarrrr' }
@@ -66,6 +101,8 @@ describe DriveWealth::Order::Status do
     end
 
     it 'returns details' do
+      # expect(placed_order.status).to eql 200
+      binding.pry
       expect(subject.status).to eql 200
       expect(subject.payload.type).to eql 'success'
       expect(subject.payload.token).not_to be_empty
