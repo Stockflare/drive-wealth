@@ -12,7 +12,7 @@ module DriveWealth
         positions = []
         blotter.raw['equity']['equityPositions'].each do |p|
           position = DriveWealth::Base::Position.new(
-            quantity: p['openQty'].to_f,
+            quantity: p['availableForTradingQty'].to_f,
             cost_basis: p['costBasis'].to_f,
             ticker: p['symbol'].downcase,
             instrument_class: 'EQUITY_OR_ETF'.downcase,
