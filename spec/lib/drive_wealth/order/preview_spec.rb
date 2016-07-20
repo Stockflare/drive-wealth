@@ -19,6 +19,7 @@ describe DriveWealth::Order::Preview do
   let(:quantity) { 10 }
   let(:ticker) { 'aapl' }
   let(:buying_power) { 10000 }
+  let(:shares) { 100 }
   let(:base_order) do
     {
       token: token,
@@ -36,6 +37,7 @@ describe DriveWealth::Order::Preview do
 
   before do
     allow(DriveWealth::Order::Preview).to receive(:buying_power).and_return(buying_power)
+    allow(DriveWealth::Order::Preview).to receive(:shares).and_return(shares)
   end
 
   subject do
@@ -106,6 +108,16 @@ describe DriveWealth::Order::Preview do
 
   describe 'for a stock that is not supported' do
     let(:ticker) { 'srne' }
+
+    it 'throws error' do
+      expect { subject }.to raise_error(Trading::Errors::OrderException)
+    end
+  end
+
+  describe 'Sell more than you own' do
+    let(:ticker) { 'aapl' }
+    let(:order_action) { :sell }
+    let(:quantity) { 500 }
 
     it 'throws error' do
       expect { subject }.to raise_error(Trading::Errors::OrderException)

@@ -17,6 +17,9 @@ module DriveWealth
       def self.buying_power(power)
         return power
       end
+      def self.shares(shares)
+        return shares
+      end
 
       def call
         # Reject any order that has an amount and is not Market
@@ -33,6 +36,17 @@ module DriveWealth
         account = details[:account]
         user_id = details[:user_id]
         buying_power = DriveWealth::Order::Preview.buying_power(account['rtCashAvailForTrading'].to_f)
+        shares = 0
+        positions = DriveWealth::Positions::Get.new(
+          token: token,
+          account_number: account_number
+        ).call.response.payload
+        position = positions.positions.select do |p|
+          p[:ticker] == ticker
+        end
+        shares = DriveWealth::Order::Preview.shares(position && !position.empty? ? position[0][:quantity] : 0.0)
+        puts 'SHARES'
+        puts shares
 
         # Get the User details so we can get the Commission amount
         uri = URI.join(DriveWealth.api_uri, "v1/users/#{user_id}")
@@ -81,50 +95,60 @@ module DriveWealth
                 estimated_value = quantity * instrument['rateBid'].to_f
               end
 
-              if (order_action == :sell || order_action == :sell_short) || ((order_action == :buy || order_action == :buy_to_cover) && (estimated_value + commission_rate) <= buying_power)
-                payload = {
-                  type: 'review',
-                  ticker: instrument['symbol'].downcase,
-                  order_action: order_action,
-                  quantity: quantity,
-                  expiration: expiration,
-                  price_label: '',
-                  value_label: '',
-                  message: '',
-                  last_price: instrument['lastTrade'].to_f,
-                  bid_price: instrument['rateBid'].to_f,
-                  ask_price: instrument['rateAsk'].to_f,
-                  timestamp: Time.now.utc.to_i,
-                  buying_power: account['rtCashAvailForTrading'].to_f,
-                  estimated_commission: commission_rate,
-                  estimated_value: estimated_value,
-                  estimated_total: estimated_value + commission_rate,
-                  warnings: [],
-                  must_acknowledge: [],
-                  amount: amount,
-                  token: token
-                }
-                raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
-                                                                         account: account,
-                                                                         user_id: user_id,
-                                                                         commission: commission_rate,
-                                                                         amount: amount)
-                self.response = DriveWealth::Base::Response.new(
-                  raw: raw,
-                  payload: payload,
-                  messages: Array('success'),
-                  status: 200
-                )
-
-                # Cache the Order details for the Order Execute Call
-                DriveWealth.cache.set("#{DriveWealth::CACHE_PREFIX}_#{token}", response.to_h.to_json, 60)
-              else
+              if (order_action == :sell || order_action == :sell_short) && shares < quantity
                 raise Trading::Errors::OrderException.new(
                   type: :error,
                   code: 403,
-                  description: 'Not enough Buying Power',
-                  messages: 'Not enough Buying Power'
+                  description: 'You do not own enough shares',
+                  messages: 'You do not own enough shares'
                 )
+              else
+                if (order_action == :sell || order_action == :sell_short) || ((order_action == :buy || order_action == :buy_to_cover) && (estimated_value + commission_rate) <= buying_power)
+                  payload = {
+                    type: 'review',
+                    ticker: instrument['symbol'].downcase,
+                    order_action: order_action,
+                    quantity: quantity,
+                    expiration: expiration,
+                    price_label: '',
+                    value_label: '',
+                    message: '',
+                    last_price: instrument['lastTrade'].to_f,
+                    bid_price: instrument['rateBid'].to_f,
+                    ask_price: instrument['rateAsk'].to_f,
+                    timestamp: Time.now.utc.to_i,
+                    buying_power: account['rtCashAvailForTrading'].to_f,
+                    estimated_commission: commission_rate,
+                    estimated_value: estimated_value,
+                    estimated_total: estimated_value + commission_rate,
+                    warnings: [],
+                    must_acknowledge: [],
+                    amount: amount,
+                    token: token
+                  }
+                  raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
+                                                                           account: account,
+                                                                           user_id: user_id,
+                                                                           commission: commission_rate,
+                                                                           amount: amount)
+                  self.response = DriveWealth::Base::Response.new(
+                    raw: raw,
+                    payload: payload,
+                    messages: Array('success'),
+                    status: 200
+                  )
+
+                  # Cache the Order details for the Order Execute Call
+                  DriveWealth.cache.set("#{DriveWealth::CACHE_PREFIX}_#{token}", response.to_h.to_json, 60)
+                else
+                  raise Trading::Errors::OrderException.new(
+                    type: :error,
+                    code: 403,
+                    description: 'Not enough Buying Power',
+                    messages: 'Not enough Buying Power'
+                  )
+                end
+
               end
 
             end
