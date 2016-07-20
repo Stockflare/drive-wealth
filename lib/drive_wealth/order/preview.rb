@@ -45,8 +45,6 @@ module DriveWealth
           p[:ticker] == ticker
         end
         shares = DriveWealth::Order::Preview.shares(position && !position.empty? ? position[0][:quantity] : 0.0)
-        puts 'SHARES'
-        puts shares
 
         # Get the User details so we can get the Commission amount
         uri = URI.join(DriveWealth.api_uri, "v1/users/#{user_id}")
