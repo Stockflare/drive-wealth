@@ -85,69 +85,78 @@ module DriveWealth
                 messages: 'Broker does not trade this instrument'
               )
             else
-              instrument = result[0]
-
-              if order_action == :buy
-                estimated_value = quantity * instrument['rateAsk'].to_f
-              else
-                estimated_value = quantity * instrument['rateBid'].to_f
-              end
-
-              if (order_action == :sell || order_action == :sell_short) && shares < quantity
+              instruments = result.select{ |i| i['symbol'].downcase === ticker.downcase }
+              if instruments.empty?
                 raise Trading::Errors::OrderException.new(
                   type: :error,
                   code: 403,
-                  description: 'You do not own enough shares',
-                  messages: 'You do not own enough shares'
+                  description: 'Broker does not trade this instrument',
+                  messages: 'Broker does not trade this instrument'
                 )
               else
-                if (order_action == :sell || order_action == :sell_short) || ((order_action == :buy || order_action == :buy_to_cover) && (estimated_value + commission_rate) <= buying_power)
-                  payload = {
-                    type: 'review',
-                    ticker: instrument['symbol'].downcase,
-                    order_action: order_action,
-                    quantity: quantity,
-                    expiration: expiration,
-                    price_label: '',
-                    value_label: '',
-                    message: '',
-                    last_price: instrument['lastTrade'].to_f,
-                    bid_price: instrument['rateBid'].to_f,
-                    ask_price: instrument['rateAsk'].to_f,
-                    timestamp: Time.now.utc.to_i,
-                    buying_power: account['rtCashAvailForTrading'].to_f,
-                    estimated_commission: commission_rate,
-                    estimated_value: estimated_value,
-                    estimated_total: estimated_value + commission_rate,
-                    warnings: [],
-                    must_acknowledge: [],
-                    amount: amount,
-                    token: token
-                  }
-                  raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
-                                                                           account: account,
-                                                                           user_id: user_id,
-                                                                           commission: commission_rate,
-                                                                           amount: amount)
-                  self.response = DriveWealth::Base::Response.new(
-                    raw: raw,
-                    payload: payload,
-                    messages: Array('success'),
-                    status: 200
-                  )
-
-                  # Cache the Order details for the Order Execute Call
-                  DriveWealth.cache.set("#{DriveWealth::CACHE_PREFIX}_#{token}", response.to_h.to_json, 60)
+                instrument = instruments[0]
+                if order_action == :buy
+                  estimated_value = quantity * instrument['rateAsk'].to_f
                 else
+                  estimated_value = quantity * instrument['rateBid'].to_f
+                end
+                if (order_action == :sell || order_action == :sell_short) && shares < quantity
                   raise Trading::Errors::OrderException.new(
                     type: :error,
                     code: 403,
-                    description: 'Not enough Buying Power',
-                    messages: 'Not enough Buying Power'
+                    description: 'You do not own enough shares',
+                    messages: 'You do not own enough shares'
                   )
-                end
+                else
+                  if (order_action == :sell || order_action == :sell_short) || ((order_action == :buy || order_action == :buy_to_cover) && (estimated_value + commission_rate) <= buying_power)
+                    payload = {
+                      type: 'review',
+                      ticker: instrument['symbol'].downcase,
+                      order_action: order_action,
+                      quantity: quantity,
+                      expiration: expiration,
+                      price_label: '',
+                      value_label: '',
+                      message: '',
+                      last_price: instrument['lastTrade'].to_f,
+                      bid_price: instrument['rateBid'].to_f,
+                      ask_price: instrument['rateAsk'].to_f,
+                      timestamp: Time.now.utc.to_i,
+                      buying_power: account['rtCashAvailForTrading'].to_f,
+                      estimated_commission: commission_rate,
+                      estimated_value: estimated_value,
+                      estimated_total: estimated_value + commission_rate,
+                      warnings: [],
+                      must_acknowledge: [],
+                      amount: amount,
+                      token: token
+                    }
+                    raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
+                                                                             account: account,
+                                                                             user_id: user_id,
+                                                                             commission: commission_rate,
+                                                                             amount: amount)
+                    self.response = DriveWealth::Base::Response.new(
+                      raw: raw,
+                      payload: payload,
+                      messages: Array('success'),
+                      status: 200
+                    )
 
+                    # Cache the Order details for the Order Execute Call
+                    DriveWealth.cache.set("#{DriveWealth::CACHE_PREFIX}_#{token}", response.to_h.to_json, 60)
+                  else
+                    raise Trading::Errors::OrderException.new(
+                      type: :error,
+                      code: 403,
+                      description: 'Not enough Buying Power',
+                      messages: 'Not enough Buying Power'
+                    )
+                  end
+
+                end
               end
+
 
             end
 
