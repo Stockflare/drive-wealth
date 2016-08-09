@@ -95,10 +95,18 @@ module DriveWealth
                 )
               else
                 instrument = instruments[0]
-                if order_action == :buy
-                  estimated_value = quantity * instrument['rateAsk'].to_f
+                if order_action == :buy  || order_action == :buy_to_cover
+                  if amount && amount > 0
+                    estimated_value = amount
+                  else
+                    estimated_value = quantity * instrument['rateAsk'].to_f
+                  end
                 else
-                  estimated_value = quantity * instrument['rateBid'].to_f
+                    if amount && amount > 0
+                      estimated_value = amount
+                    else
+                      estimated_value = quantity * instrument['rateBid'].to_f
+                    end
                 end
                 if (order_action == :sell || order_action == :sell_short) && shares < quantity
                   raise Trading::Errors::OrderException.new(
@@ -131,6 +139,15 @@ module DriveWealth
                       amount: amount,
                       token: token
                     }
+                    # Prioritise Amount orders over quantity orders
+                    if amount && amount > 0
+                      payload[:amount] = amount
+                      payload[:quantity] = 0.0
+                    else
+                      payload[:amount] = 0.0
+                      payload[:quantity] = quantity
+                    end
+
                     raw = attributes.reject { |k, _v| k == :response }.merge(instrument: instrument,
                                                                              account: account,
                                                                              user_id: user_id,

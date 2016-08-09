@@ -20,9 +20,16 @@ module DriveWealth
               ordType: DriveWealth.price_types[preview['raw']['price_type'].to_sym],
               side: DriveWealth.order_actions[preview['raw']['order_action'].to_sym],
               instrumentID: preview['raw']['instrument']['instrumentID'],
-              orderQty: preview['raw']['quantity'].to_f,
               comment: ''
             }
+
+            # Priortise Amount orders over quantity
+            if preview['raw'].has_key?('amount') && preview['raw']['amount'].to_f > 0
+              body[:orderQty] = 0.0
+              body[:amountCash] = preview['raw']['amount'].to_f
+            else
+              body[:orderQty] = preview['raw']['quantity'].to_f
+            end
 
             body[:price] = price if preview['raw']['price_type'].to_sym == :stop_market
             body[:limitPrice] = price if preview['raw']['price_type'].to_sym == :limit
@@ -91,7 +98,7 @@ module DriveWealth
               code: '403',
               description: 'Order could not be found',
               messages: 'Order could not be found'
-            )            
+            )
           end
         rescue Exception => e
           raise Trading::Errors::OrderException.new(

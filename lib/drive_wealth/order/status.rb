@@ -34,7 +34,6 @@ module DriveWealth
         end.compact
 
         if payload_orders.count > 0
-
           payload = {
             type: 'success',
             orders: payload_orders,

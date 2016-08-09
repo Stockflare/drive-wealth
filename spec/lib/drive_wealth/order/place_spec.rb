@@ -78,6 +78,7 @@ describe DriveWealth::Order::Place do
   end
 
   describe 'Buy Order with Amount' do
+    let(:quantity) { 99.99 }
     let(:order_extras) do
       {
         amount: 500.0
@@ -89,7 +90,8 @@ describe DriveWealth::Order::Place do
       expect(subject.payload.token).not_to be_empty
       expect(subject.payload.ticker).to eql 'aapl'
       expect(subject.payload.order_action).to eql :buy
-      expect(subject.payload.quantity).to eql 10.0
+      expect(subject.payload.quantity).not_to eql quantity
+      expect(subject.payload.quantity).to eql 0.0
       expect(subject.payload.expiration).to eql :day
       expect(subject.payload.price_label).to eql 'Market'
       # expect(subject.payload.message).to eql subject.raw['confirmationMessage']

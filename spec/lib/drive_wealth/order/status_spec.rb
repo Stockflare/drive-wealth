@@ -71,7 +71,7 @@ describe DriveWealth::Order::Status do
       expect(subject.payload.orders[0].order_action).to eql :buy
       expect(subject.payload.orders[0].filled_quantity).to eql quantity
       expect(subject.payload.orders[0].filled_price).to be > 0
-      expect(subject.payload.orders[0].quantity).to quantity
+      expect(subject.payload.orders[0].quantity).to eql quantity
       expect(subject.payload.orders[0].expiration).to eql :day
       expect(subject.payload.orders[0].status).to eql :filled
     end
@@ -102,7 +102,6 @@ describe DriveWealth::Order::Status do
 
     it 'returns details' do
       # expect(placed_order.status).to eql 200
-      binding.pry
       expect(subject.status).to eql 200
       expect(subject.payload.type).to eql 'success'
       expect(subject.payload.token).not_to be_empty

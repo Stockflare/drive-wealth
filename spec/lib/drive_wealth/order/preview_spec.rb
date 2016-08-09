@@ -96,6 +96,7 @@ describe DriveWealth::Order::Preview do
   end
 
   describe 'Market Buy with Amount' do
+    let(:quantity) { 999.99 }
     let(:order_extras) do
       {
         amount: 10.0
@@ -103,6 +104,8 @@ describe DriveWealth::Order::Preview do
     end
     it 'returns details' do
       expect(subject.payload.amount).to eql 10.0
+      expect(subject.payload.quantity).to eql 0.0
+      expect(subject.payload.estimated_value).to eql 10.0
     end
   end
 
