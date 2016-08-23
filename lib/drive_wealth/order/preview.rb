@@ -34,8 +34,9 @@ module DriveWealth
 
         details = DriveWealth::User.get_account(token, account_number)
         account = details[:account]
+        blotter = DriveWealth::User::Account.new(token: token, account_number: account_number).call.response.payload
         user_id = details[:user_id]
-        buying_power = DriveWealth::Order::Preview.buying_power(account['rtCashAvailForTrading'].to_f)
+        buying_power = DriveWealth::Order::Preview.buying_power(blotter['power'].to_f)
         shares = 0
         positions = DriveWealth::Positions::Get.new(
           token: token,
@@ -130,7 +131,7 @@ module DriveWealth
                       bid_price: instrument['rateBid'].to_f,
                       ask_price: instrument['rateAsk'].to_f,
                       timestamp: Time.now.utc.to_i,
-                      buying_power: account['rtCashAvailForTrading'].to_f,
+                      buying_power: blotter['power'].to_f,
                       estimated_commission: commission_rate,
                       estimated_value: estimated_value,
                       estimated_total: estimated_value + commission_rate,
