@@ -58,11 +58,21 @@ module DriveWealth
         result = JSON.parse(resp.body)
 
         if resp.code == '200'
-          commission_rate = result['commissionRate'].to_f
+          # Calculate commission
+          commission_rate = 0
 
-          # Hack for Drivewealth fractional shares
-          if quantity < 1.0
-            commission_rate = 0.99
+          # First do basic commission
+          if quantity < 1
+            commission_rate = commission_rate + account['commissionSchedule']['fractionalRate']
+          else
+            commission_rate = commission_rate + account['commissionSchedule']['baseRate']
+          end
+
+          # User is above the baseShares amount
+          if quantity > account['commissionSchedule']['baseShares']
+            # Add on the extra commission
+            extra_quantity = quantity - account['commissionSchedule']['baseShares']
+            commission_rate = commission_rate + (account['commissionSchedule']['excessRate'] * extra_quantity)
           end
 
           # Lookup the Stock in order to get ID and prices

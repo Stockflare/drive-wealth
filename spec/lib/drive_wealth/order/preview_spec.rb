@@ -68,6 +68,20 @@ describe DriveWealth::Order::Preview do
     end
   end
 
+  describe 'Buy Fractional' do
+    let(:quantity) { 0.5 }
+    it 'returns details' do
+      expect(subject.payload.estimated_commission).to eql 0.99
+    end
+  end
+
+  describe 'Buy Over BaseRate' do
+    let(:quantity) { 500 }
+    it 'returns details' do
+      expect(subject.payload.estimated_commission).to eql 6.2525
+    end
+  end
+
   describe 'Sell Order' do
     let(:order_action) { :sell }
     it 'returns details' do
