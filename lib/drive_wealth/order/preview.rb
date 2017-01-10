@@ -72,8 +72,9 @@ module DriveWealth
           if quantity > account['commissionSchedule']['baseShares']
             # Add on the extra commission
             extra_quantity = quantity - account['commissionSchedule']['baseShares']
-            commission_rate = commission_rate + (account['commissionSchedule']['excessRate'] * extra_quantity)
+            commission_rate = commission_rate + (account['commissionSchedule']['excessRate'] * extra_quantity.ceil)
           end
+          commission_rate = commission_rate.round(2)
 
           # Lookup the Stock in order to get ID and prices
           uri = URI.join(DriveWealth.api_uri, "v1/instruments?symbol=#{ticker}")
