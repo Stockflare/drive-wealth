@@ -58,24 +58,6 @@ module DriveWealth
         result = JSON.parse(resp.body)
 
         if resp.code == '200'
-          # Calculate commission
-          commission_rate = 0
-
-          # First do basic commission
-          if quantity < 1
-            commission_rate = commission_rate + account['commissionSchedule']['fractionalRate']
-          else
-            commission_rate = commission_rate + account['commissionSchedule']['baseRate']
-          end
-
-          # User is above the baseShares amount
-          if quantity > account['commissionSchedule']['baseShares']
-            # Add on the extra commission
-            extra_quantity = quantity - account['commissionSchedule']['baseShares']
-            commission_rate = commission_rate + (account['commissionSchedule']['excessRate'] * extra_quantity.ceil)
-          end
-          commission_rate = commission_rate.round(2)
-
           # Lookup the Stock in order to get ID and prices
           uri = URI.join(DriveWealth.api_uri, "v1/instruments?symbol=#{ticker}")
           req = Net::HTTP::Get.new(uri, initheader = {
@@ -107,19 +89,44 @@ module DriveWealth
                 )
               else
                 instrument = instruments[0]
+                estimated_quantity = 0
                 if order_action == :buy  || order_action == :buy_to_cover
                   if amount && amount > 0
                     estimated_value = amount
+                    estimated_quantity = amount / instrument['rateAsk'].to_f
                   else
                     estimated_value = quantity * instrument['rateAsk'].to_f
+                    estimated_quantity = quantity
                   end
                 else
                     if amount && amount > 0
                       estimated_value = amount
+                      estimated_quantity = amount / instrument['rateBid'].to_f
                     else
                       estimated_value = quantity * instrument['rateBid'].to_f
+                      estimated_quantity = quantity
                     end
                 end
+
+                # Calculate commission
+                commission_rate = 0
+
+                # First do basic commission
+                if estimated_quantity < 1
+                  commission_rate = commission_rate + account['commissionSchedule']['fractionalRate']
+                else
+                  commission_rate = commission_rate + account['commissionSchedule']['baseRate']
+                end
+
+                # User is above the baseShares amount
+                if estimated_quantity > account['commissionSchedule']['baseShares']
+                  # Add on the extra commission
+                  extra_quantity = estimated_quantity - account['commissionSchedule']['baseShares']
+                  commission_rate = commission_rate + (account['commissionSchedule']['excessRate'] * extra_quantity.ceil)
+                end
+                commission_rate = commission_rate.round(2)
+
+                # See if there are enough shares
                 if (order_action == :sell || order_action == :sell_short) && shares < quantity
                   raise Trading::Errors::OrderException.new(
                     type: :error,
