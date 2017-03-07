@@ -42,6 +42,17 @@ describe DriveWealth do
       expect { DriveWealth.language }.to raise_error(Trading::Errors::ConfigException)
     end
   end
+  describe '#subscription_product_id' do
+    it 'returns ENV - DRIVE_WEALTH_SUB_PRODUCT_ID' do
+      expect(DriveWealth.subscription_product_id).to eql ENV['DRIVE_WEALTH_SUB_PRODUCT_ID']
+    end
+    it 'raises error when not configured' do
+      DriveWealth.configure do |config|
+        config.subscription_product_id = nil
+      end
+      expect { DriveWealth.subscription_product_id }.to raise_error(Trading::Errors::ConfigException)
+    end
+  end
 
   # describe '#cache' do
   #   it 'returns An instance of Memcached' do

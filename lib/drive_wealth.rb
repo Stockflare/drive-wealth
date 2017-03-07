@@ -17,7 +17,7 @@ module DriveWealth
 
   class << self
 
-    attr_writer :logger, :api_uri, :referral_code, :language, :cache
+    attr_writer :logger, :api_uri, :referral_code, :language, :cache, :subscription_product_id
 
     # Helper to configure .
     #
@@ -152,6 +152,19 @@ module DriveWealth
           code: 500,
           description: 'language missing',
           messages: ['language configuration variable has not been set']
+        )
+      end
+    end
+
+    def subscription_product_id
+      if @subscription_product_id
+        return @subscription_product_id
+      else
+        raise Trading::Errors::ConfigException.new(
+          type: :error,
+          code: 500,
+          description: 'subscription_product_id missing',
+          messages: ['subscription_product_id configuration variable has not been set']
         )
       end
     end
