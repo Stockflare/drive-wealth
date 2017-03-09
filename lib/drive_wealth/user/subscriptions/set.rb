@@ -36,6 +36,7 @@ module DriveWealth
               payload = {
                 type: 'success',
                 subscription: result['subscriptionID'],
+                subscriptions: [],
                 token: token
               }
 
