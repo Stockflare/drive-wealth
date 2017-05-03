@@ -35,6 +35,7 @@ module DriveWealth
             day_return_percent: 0.0,
             total_return: 0.0,
             total_return_percent: 0.0,
+            base_currency_code: 'usd',
             value: result['equity']['equityValue'].to_f,
             token: token
           }
